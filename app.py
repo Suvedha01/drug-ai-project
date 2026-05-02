@@ -6,7 +6,7 @@ import joblib
 st.set_page_config(page_title="LigandLogic", layout="wide")
 
 # =========================
-# 🎨 STYLE (Obsidian + hierarchy)
+# 🎨 STYLE (Hero + accents)
 # =========================
 st.markdown("""
 <style>
@@ -16,34 +16,47 @@ st.markdown("""
 }
 
 /* HERO */
-.hero{
-  text-align:center;
-  margin-top:10px;
-}
+.hero{ text-align:center; margin-top:10px; }
+.logo{ font-size:22px; margin-bottom:6px; opacity:.9; }
+
 .title{
   font-family: Inter, sans-serif;
   font-weight:800;
-  font-size:56px;
+  font-size:58px;
   letter-spacing:-1px;
-  color:#FFFFFF;
+  background: linear-gradient(90deg,#00D1FF,#6366F1);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  text-shadow: 0 0 20px rgba(0,209,255,0.25);
 }
+
 .tagline{
   font-family: Inter, sans-serif;
   font-weight:400;
-  font-size:16px;
+  font-size:18px;
   color:#94A3B8;
-  margin-top:6px;
+  margin-top:8px;
 }
 
-/* SECTION */
-.section{
-  margin-top:28px;
-  font-size:24px;
-  font-weight:600;
-  color:#00D1FF;
+/* badges */
+.badge{
+  display:inline-block;
+  padding:6px 12px;
+  border-radius:20px;
+  border:1px solid #30363D;
+  margin:6px;
+  font-size:12px;
+  color:#CBD5E1;
 }
 
-/* GLASS CARD */
+/* divider */
+.hr{
+  height:1px;
+  background: linear-gradient(90deg, transparent, #00D1FF, transparent);
+  margin:18px 0 22px 0;
+}
+
+/* CARD */
 .card{
   background: rgba(255,255,255,0.05);
   backdrop-filter: blur(12px);
@@ -78,28 +91,18 @@ input{
   -webkit-text-fill-color:transparent;
 }
 
-/* BIG DECISION BADGE */
+/* DECISION */
 .decision{
   text-align:center;
-  font-size:22px;
+  font-size:24px;
   font-weight:700;
-  padding:16px;
+  padding:18px;
   border-radius:14px;
   margin-top:10px;
 }
 .good{background:rgba(0,255,163,0.1); color:#00FFA3;}
 .mid{background:rgba(255,209,102,0.1); color:#FFD166;}
 .bad{background:rgba(239,71,111,0.1); color:#EF476F;}
-
-/* LED */
-.led{
-  height:10px;width:10px;border-radius:50%;
-  display:inline-block;margin-right:6px;
-}
-.green{background:#00FFA3;}
-.yellow{background:#FFD166;}
-.red{background:#EF476F;}
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -117,12 +120,21 @@ except:
     model = Dummy()
 
 # =========================
-# HERO
+# HERO (NEW)
 # =========================
 st.markdown("""
 <div class="hero">
+  <div class="logo">🧬 LigandLogic</div>
   <div class="title">LigandLogic</div>
-  <div class="tagline">Where machine learning meets molecular intelligence</div>
+  <div class="tagline">AI-driven molecular intelligence for next-gen drug discovery</div>
+
+  <div>
+    <span class="badge">⚡ Machine Learning</span>
+    <span class="badge">🧪 Drug Discovery</span>
+    <span class="badge">📊 Predictive Ranking</span>
+  </div>
+
+  <div class="hr"></div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -177,7 +189,6 @@ if st.button("Analyze Molecule"):
     score = float((pred + 10) / 10)
     score = max(0.0, min(score, 1.0))
 
-    # DECISION (MAIN EMPHASIS)
     if score >= 0.75:
         decision, cls = "DRUG-LIKE CANDIDATE", "good"
     elif score >= 0.5:
@@ -185,25 +196,16 @@ if st.button("Analyze Molecule"):
     else:
         decision, cls = "NOT DRUG-LIKE", "bad"
 
-    # ===== RESULTS =====
-    st.markdown('<div class="section">Results</div>', unsafe_allow_html=True)
+    st.markdown("## Results")
 
-    # BIG DECISION FIRST
+    # BIG DECISION
     st.markdown(f'<div class="decision {cls}">{decision}</div>', unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2 = st.columns(2)
     col1.markdown(f'<div class="metric">{score:.2f}</div><p>AI Score</p>', unsafe_allow_html=True)
     col2.markdown(f'<div class="metric">{score*100:.1f}%</div><p>Confidence</p>', unsafe_allow_html=True)
-    col3.markdown(f'<span class="led {"green" if score>0.7 else "yellow" if score>0.5 else "red"}"></span>{"Model Loaded" if model_loaded else "Fallback"}', unsafe_allow_html=True)
 
     st.progress(score)
-
-    # ===== PROPERTIES =====
-    st.markdown('<div class="section">Molecular Properties</div>', unsafe_allow_html=True)
-    cols = st.columns(4)
-    for i,(k,v) in enumerate(features.iloc[0].items()):
-        cols[i%4].metric(k, f"{v:.2f}")
-
 
 
 
