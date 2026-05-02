@@ -15,7 +15,7 @@ body {
 }
 .title {
     text-align: center;
-    font-size: 45px;
+    font-size: 44px;
     font-weight: bold;
 }
 .tagline {
@@ -52,7 +52,7 @@ st.markdown('<div class="tagline">where machine learning meets molecular intelli
 model = joblib.load("model.pkl")
 
 # =========================
-# FEATURE ORDER
+# FEATURE ORDER (MUST MATCH MODEL)
 # =========================
 feature_order = [
     'MolWt','MolLogP','MolMR','HeavyAtomCount','NumHAcceptors',
@@ -88,7 +88,7 @@ def get_properties(smiles):
 smiles = st.text_input("Enter SMILES", placeholder="e.g. CCO")
 
 # =========================
-# MAIN
+# MAIN LOGIC
 # =========================
 if st.button("Analyze Molecule"):
 
@@ -125,16 +125,16 @@ if st.button("Analyze Molecule"):
     score = max(0.0, min(score, 1.0))
 
     # =========================
-    # IMPROVED RULE SYSTEM
+    # BALANCED RULE SYSTEM
     # =========================
     rule_score = 1.0
 
-    # Lipinski penalties
+    # Lipinski rules (soft penalties)
     if props['MolWt'] > 500:
-        rule_score -= 0.4
+        rule_score -= 0.3
 
     if props['MolLogP'] > 5:
-        rule_score -= 0.4
+        rule_score -= 0.3
 
     if props['NumHDonors'] > 5:
         rule_score -= 0.2
@@ -142,26 +142,16 @@ if st.button("Analyze Molecule"):
     if props['NumHAcceptors'] > 10:
         rule_score -= 0.2
 
-    # NEW corrections (fix moderate issue)
-
-    if props['MolWt'] < 180:
-        rule_score -= 0.3
-
-    if props['TPSA'] < 40:
-        rule_score -= 0.3
-
-    if (props['NumHDonors'] + props['NumHAcceptors']) <= 2:
-        rule_score -= 0.3
-
+    # Only strong correction → alkane detection
     if props['NumHDonors'] == 0 and props['NumHAcceptors'] == 0:
         rule_score -= 0.6
 
     rule_score = max(0.0, rule_score)
 
     # =========================
-    # FINAL SCORE
+    # FINAL SCORE (BALANCED)
     # =========================
-    final_score = (0.4 * score) + (0.6 * rule_score)
+    final_score = (0.6 * score) + (0.4 * rule_score)
 
     # =========================
     # DECISION
