@@ -4,7 +4,7 @@ import numpy as np
 
 st.set_page_config(page_title="LigandLogic", layout="wide")
 
-# ===== BASIC CHECK =====
+# ===== BASIC CHECK ====
 st.write("App started successfully")
 
 # ===== TEMP MODEL (SAFE) =====
