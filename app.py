@@ -6,7 +6,7 @@ import requests
 st.set_page_config(page_title="LigandLogic", layout="wide")
 
 # =========================
-# 🎨 CLEAN PROFESSIONAL UI
+# 🎨 CLEAN UI
 # =========================
 st.markdown("""
 <style>
@@ -52,7 +52,7 @@ st.markdown('<div class="tagline">where machine learning meets molecular intelli
 model = joblib.load("model.pkl")
 
 # =========================
-# FEATURE ORDER (CRITICAL)
+# FEATURE ORDER
 # =========================
 feature_order = [
     'MolWt','MolLogP','MolMR','HeavyAtomCount','NumHAcceptors',
@@ -88,7 +88,7 @@ def get_properties(smiles):
 smiles = st.text_input("Enter SMILES", placeholder="e.g. CCO")
 
 # =========================
-# MAIN ACTION
+# MAIN
 # =========================
 if st.button("Analyze Molecule"):
 
@@ -103,7 +103,7 @@ if st.button("Analyze Molecule"):
         st.stop()
 
     # =========================
-    # BUILD FEATURE VECTOR
+    # FEATURE VECTOR
     # =========================
     data = {col: 0.0 for col in feature_order}
 
@@ -125,10 +125,11 @@ if st.button("Analyze Molecule"):
     score = max(0.0, min(score, 1.0))
 
     # =========================
-    # STRONG RULE-BASED FIX
+    # IMPROVED RULE SYSTEM
     # =========================
     rule_score = 1.0
 
+    # Lipinski penalties
     if props['MolWt'] > 500:
         rule_score -= 0.4
 
@@ -141,14 +142,24 @@ if st.button("Analyze Molecule"):
     if props['NumHAcceptors'] > 10:
         rule_score -= 0.2
 
-    # 🔥 Critical fix for alkane issue
+    # NEW corrections (fix moderate issue)
+
+    if props['MolWt'] < 180:
+        rule_score -= 0.3
+
+    if props['TPSA'] < 40:
+        rule_score -= 0.3
+
+    if (props['NumHDonors'] + props['NumHAcceptors']) <= 2:
+        rule_score -= 0.3
+
     if props['NumHDonors'] == 0 and props['NumHAcceptors'] == 0:
         rule_score -= 0.6
 
     rule_score = max(0.0, rule_score)
 
     # =========================
-    # FINAL SCORE (WEIGHTED)
+    # FINAL SCORE
     # =========================
     final_score = (0.4 * score) + (0.6 * rule_score)
 
