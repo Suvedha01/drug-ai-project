@@ -5,83 +5,92 @@ import numpy as np
 
 st.set_page_config(page_title="LigandLogic", layout="wide")
 
-# ===== ADVANCED UI =====
 st.markdown("""
 <style>
 
 /* Background */
 .stApp {
-    background: radial-gradient(circle at 20% 30%, #1f1c2c, #928dab);
+    background-color: #0B0E14;
+    color: #E6EDF3;
+}
+
+/* Title */
+.title {
+    font-size: 52px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-align: center;
     color: white;
+    text-shadow: 0px 0px 15px rgba(0, 209, 255, 0.3);
 }
 
-/* Hero Title */
-.hero {
-    font-size: 64px;
-    font-weight: 800;
+/* Subtitle */
+.subtitle {
     text-align: center;
-    letter-spacing: 2px;
-    background: linear-gradient(90deg, #00f5d4, #9b5de5);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #8B949E;
+    margin-bottom: 30px;
 }
 
-/* Tagline */
-.tagline {
-    text-align: center;
-    font-size: 20px;
-    color: #e0e0e0;
-    margin-bottom: 40px;
-}
-
-/* Glass card */
+/* Cards */
 .card {
-    background: rgba(255,255,255,0.08);
-    padding: 25px;
-    border-radius: 20px;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 0 30px rgba(0,255,200,0.2);
+    background-color: #161B22;
+    border: 1px solid #30363D;
+    border-radius: 12px;
+    padding: 20px;
 }
 
-/* Input box fix */
-input {
-    color: white !important;
-    background-color: rgba(255,255,255,0.1) !important;
-    border-radius: 10px !important;
+/* SMILES input */
+textarea, input {
+    background-color: #0B0E14 !important;
+    color: #E6EDF3 !important;
+    border: 1px solid #30363D !important;
+    font-family: monospace !important;
+    border-radius: 8px !important;
 }
 
 /* Button */
 .stButton>button {
-    background: linear-gradient(90deg,#00f5d4,#9b5de5);
+    background-color: #00D1FF;
     color: black;
-    font-weight: bold;
-    border-radius: 15px;
-    height: 3.5em;
+    font-weight: 600;
+    border-radius: 10px;
+    height: 3em;
     width: 100%;
-    transition: 0.3s;
 }
 .stButton>button:hover {
-    transform: scale(1.08);
+    box-shadow: 0px 0px 15px rgba(0, 209, 255, 0.6);
 }
 
-/* Glow effect */
-.glow {
-    text-align: center;
-    animation: glow 2s infinite alternate;
+/* Sample chips */
+.chip {
+    display: inline-block;
+    padding: 8px 12px;
+    margin: 5px;
+    border-radius: 8px;
+    background-color: #21262D;
+    border: 1px solid #30363D;
+    cursor: pointer;
 }
-@keyframes glow {
-    from {text-shadow: 0 0 10px #00f5d4;}
-    to {text-shadow: 0 0 30px #9b5de5;}
+.chip:hover {
+    background-color: #30363D;
+}
+
+/* Stats */
+.stat {
+    font-size: 20px;
+    font-weight: 600;
+    color: #00FFA3;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
-# ===== HERO =====
-st.markdown('<div class="hero glow">LigandLogic</div>', unsafe_allow_html=True)
-st.markdown('<div class="tagline">Redefining molecular intelligence through predictive AI-driven ranking</div>', unsafe_allow_html=True)
+# HEADER
+st.markdown('<div class="title">LigandLogic</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">AI-driven molecular prioritization for computational drug discovery</div>', unsafe_allow_html=True)
 
-# Load model
+
+# LOAD MODEL
 model = joblib.load("model.pkl")
 
 feature_order = [
@@ -92,23 +101,47 @@ feature_order = [
  'BalabanJ','BertzCT'
 ]
 
-# Layout
-col1, col2 = st.columns([2,1])
 
-with col1:
+# LAYOUT
+col_main, col_side = st.columns([3, 1.5])
+
+
+# LEFT PANEL
+with col_main:
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    smiles = st.text_input("Enter SMILES", placeholder="e.g. CCO")
+
+    smiles = st.text_input("SMILES Input", placeholder="Enter molecule (e.g. CCO)")
+
+    st.markdown("**Sample Molecules:**")
+
+    # clickable chips (simulated)
+    sample_list = ["CCO", "CCC", "CCN", "C1=CC=CC=C1"]
+
+    selected_sample = None
+    cols = st.columns(len(sample_list))
+    for i, s in enumerate(sample_list):
+        if cols[i].button(s):
+            selected_sample = s
+
+    if selected_sample:
+        smiles = selected_sample
+
     st.markdown('</div>', unsafe_allow_html=True)
 
-with col2:
-    st.markdown("""
-    <div class="card">
-    <h4>Sample Inputs</h4>
-    CCO<br>CCC<br>CCN
-    </div>
-    """, unsafe_allow_html=True)
 
-# Feature generator
+# RIGHT PANEL
+with col_side:
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+
+    st.markdown("### Prediction Stats")
+
+    score_placeholder = st.empty()
+    rank_placeholder = st.empty()
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+
+# FEATURE GENERATION
 def featurize(smiles):
     return pd.DataFrame([{
         'MolWt': np.random.uniform(200, 500),
@@ -130,28 +163,21 @@ def featurize(smiles):
         'BertzCT': np.random.uniform(0, 1000)
     }])
 
-# Action
-if st.button("Analyze Molecule"):
 
-    with st.spinner("Running AI model..."):
-        features = featurize(smiles)
-        features = features[feature_order]
-        pred = model.predict(features)[0]
+# ACTION BUTTON
+if st.button("Analyze"):
 
-    st.markdown(f"""
-    <div class="card">
-        <h2 style="text-align:center;">Score: {pred:.3f}</h2>
-    </div>
-    """, unsafe_allow_html=True)
+    features = featurize(smiles)
+    features = features[feature_order]
+
+    pred = model.predict(features)[0]
+
+    # Update stats panel
+    score_placeholder.markdown(f'<div class="stat">Score: {pred:.3f}</div>', unsafe_allow_html=True)
+    rank_placeholder.markdown(f'<div class="stat">Rank Confidence: {pred*100:.1f}%</div>', unsafe_allow_html=True)
 
     st.progress(min(max(pred, 0), 1))
 
-    if pred > 0.7:
-        st.success("High potential drug candidate")
-    elif pred > 0.5:
-        st.info("Moderate candidate")
-    else:
-        st.warning("Low potential")
-
+# FOOTER
 st.markdown("---")
-st.markdown("LigandLogic | AI x Bioinformatics")
+st.markdown("LigandLogic • Computational Drug Discovery Interface")
