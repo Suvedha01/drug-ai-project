@@ -52,7 +52,7 @@ st.markdown('<div class="tagline">where machine learning meets molecular intelli
 model = joblib.load("model.pkl")
 
 # =========================
-# FEATURE ORDER (MUST MATCH MODEL)
+# FEATURE ORDER
 # =========================
 feature_order = [
     'MolWt','MolLogP','MolMR','HeavyAtomCount','NumHAcceptors',
@@ -103,7 +103,7 @@ if st.button("Analyze Molecule"):
         st.stop()
 
     # =========================
-    # FEATURE VECTOR
+    # FEATURE VECTOR (ML input)
     # =========================
     data = {col: 0.0 for col in feature_order}
 
@@ -117,19 +117,18 @@ if st.button("Analyze Molecule"):
     features = features.astype(float)
 
     # =========================
-    # MODEL PREDICTION
+    # ML PREDICTION (secondary)
     # =========================
     pred = model.predict(features)[0]
-
-    score = float((pred + 10) / 10)
-    score = max(0.0, min(score, 1.0))
+    ml_score = float((pred + 10) / 10)
+    ml_score = max(0.0, min(ml_score, 1.0))
 
     # =========================
-    # BALANCED RULE SYSTEM
+    # RULE-BASED CORE LOGIC
     # =========================
     rule_score = 1.0
 
-    # Lipinski rules (soft penalties)
+    # Lipinski rules
     if props['MolWt'] > 500:
         rule_score -= 0.3
 
@@ -142,26 +141,24 @@ if st.button("Analyze Molecule"):
     if props['NumHAcceptors'] > 10:
         rule_score -= 0.2
 
-    # Only strong correction → alkane detection
+    # Strong penalty for hydrocarbons (fix alkane issue)
     if props['NumHDonors'] == 0 and props['NumHAcceptors'] == 0:
         rule_score -= 0.6
 
     rule_score = max(0.0, rule_score)
 
     # =========================
-    # FINAL SCORE (BALANCED)
+    # FINAL DECISION (RULE-DRIVEN)
     # =========================
-    final_score = (0.6 * score) + (0.4 * rule_score)
-
-    # =========================
-    # DECISION
-    # =========================
-    if final_score >= 0.7:
+    if rule_score >= 0.7:
         decision, cls = "DRUG-LIKE", "good"
-    elif final_score >= 0.4:
+    elif rule_score >= 0.4:
         decision, cls = "MODERATE", "mid"
     else:
         decision, cls = "NOT DRUG-LIKE", "bad"
+
+    # Optional combined score (display only)
+    final_score = (0.5 * ml_score) + (0.5 * rule_score)
 
     # =========================
     # OUTPUT
@@ -169,10 +166,10 @@ if st.button("Analyze Molecule"):
     st.markdown(f'<div class="result {cls}">{decision}</div>', unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
-    col1.write(f"Final Score: {final_score:.2f}")
-    col2.write(f"Confidence: {final_score*100:.1f}%")
+    col1.write(f"Rule Score: {rule_score:.2f}")
+    col2.write(f"ML Score: {ml_score:.2f}")
 
-    st.progress(final_score)
+    st.progress(rule_score)
 
     st.write("### Molecular Properties")
     st.write(props)
