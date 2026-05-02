@@ -1,4 +1,7 @@
 import streamlit as st
+import pandas as pd
+import joblib
+import requests
 
 st.set_page_config(page_title="LigandLogic", layout="wide")
 
@@ -7,7 +10,6 @@ st.set_page_config(page_title="LigandLogic", layout="wide")
 # =========================
 st.markdown("""
 <style>
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&family=Space+Grotesk:wght@600&display=swap');
 
 .stApp {
@@ -15,19 +17,15 @@ st.markdown("""
     color: #1e293b;
 }
 
-/* HERO */
 .hero {
     text-align: center;
     margin-top: 30px;
 }
 
-/* ICON */
 .icon {
     font-size: 70px;
-    margin-bottom: 10px;
 }
 
-/* TITLE */
 .title {
     font-family: 'Space Grotesk', sans-serif;
     font-size: 48px;
@@ -37,7 +35,6 @@ st.markdown("""
     -webkit-text-fill-color: transparent;
 }
 
-/* TAGLINE */
 .tagline {
     font-family: 'Inter', sans-serif;
     font-size: 16px;
@@ -46,12 +43,6 @@ st.markdown("""
     margin-top: 5px;
 }
 
-/* INPUT */
-input {
-    border-radius: 10px !important;
-}
-
-/* BUTTON */
 .stButton>button {
     background: linear-gradient(90deg,#ff4e50,#f9d423);
     color: white;
@@ -61,7 +52,6 @@ input {
     border: none;
 }
 
-/* RESULT CARD */
 .result {
     text-align: center;
     font-size: 24px;
@@ -75,12 +65,10 @@ input {
 .mid { background: linear-gradient(90deg,#fbd786,#f7797d); color:black; }
 .bad { background: linear-gradient(90deg,#ff4e50,#dd2476); color:white; }
 
-/* METRIC BOX */
 .metric {
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 600;
 }
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -96,31 +84,45 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =========================
+# LOAD MODEL
+# =========================
+model = joblib.load("model.pkl")
+
+# =========================
+# FEATURE ORDER (CRITICAL)
+# =========================
+feature_order = [
+    'MolWt','MolLogP','MolMR','HeavyAtomCount','NumHAcceptors',
+    'NumHDonors','NumHeteroatoms','NumRotatableBonds',
+    'NumValenceElectrons','NumAromaticRings','NumSaturatedRings',
+    'NumAliphaticRings','RingCount','TPSA','LabuteASA',
+    'BalabanJ','BertzCT'
+]
+
+# =========================
+# GET PROPERTIES FROM PUBCHEM
+# =========================
+def get_properties(smiles):
+    try:
+        url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/{smiles}/property/MolecularWeight,XLogP,HBondDonorCount,HBondAcceptorCount,TPSA/JSON"
+        res = requests.get(url, timeout=5)
+        data = res.json()
+        props = data['PropertyTable']['Properties'][0]
+
+        return {
+            'MolWt': float(props.get('MolecularWeight', 0)),
+            'MolLogP': float(props.get('XLogP', 0)),
+            'NumHDonors': float(props.get('HBondDonorCount', 0)),
+            'NumHAcceptors': float(props.get('HBondAcceptorCount', 0)),
+            'TPSA': float(props.get('TPSA', 0))
+        }
+    except:
+        return None
+
+# =========================
 # INPUT
 # =========================
 smiles = st.text_input("Enter SMILES", placeholder="e.g. CCO")
-
-# =========================
-# SIMPLE CHEMISTRY LOGIC
-# =========================
-def analyze(smiles):
-    score = 1.0
-
-    length = len(smiles)
-
-    # Rule 1: too large molecule
-    if length > 25:
-        score -= 0.4
-
-    # Rule 2: no functional groups
-    if "O" not in smiles and "N" not in smiles:
-        score -= 0.3
-
-    # Rule 3: too many carbons
-    if smiles.count("C") > 15:
-        score -= 0.3
-
-    return max(0.0, score)
 
 # =========================
 # ACTION
@@ -131,9 +133,38 @@ if st.button("Analyze Molecule"):
         st.error("Please enter a SMILES string")
         st.stop()
 
-    score = analyze(smiles)
+    props = get_properties(smiles)
 
+    if props is None:
+        st.error("Invalid SMILES or API failed")
+        st.stop()
+
+    # =========================
+    # BUILD FEATURE VECTOR
+    # =========================
+    data = {col: 0.0 for col in feature_order}
+
+    data['MolWt'] = props['MolWt']
+    data['MolLogP'] = props['MolLogP']
+    data['NumHDonors'] = props['NumHDonors']
+    data['NumHAcceptors'] = props['NumHAcceptors']
+    data['TPSA'] = props['TPSA']
+
+    features = pd.DataFrame([data])[feature_order]
+    features = features.astype(float)
+
+    # =========================
+    # PREDICT
+    # =========================
+    pred = model.predict(features)[0]
+
+    # normalize
+    score = float((pred + 10) / 10)
+    score = max(0.0, min(score, 1.0))
+
+    # =========================
     # DECISION
+    # =========================
     if score >= 0.7:
         decision, cls = "DRUG-LIKE", "good"
     elif score >= 0.4:
@@ -141,7 +172,9 @@ if st.button("Analyze Molecule"):
     else:
         decision, cls = "NOT DRUG-LIKE", "bad"
 
+    # =========================
     # OUTPUT
+    # =========================
     st.markdown(f'<div class="result {cls}">{decision}</div>', unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
@@ -149,3 +182,6 @@ if st.button("Analyze Molecule"):
     col2.markdown(f'<div class="metric">{score*100:.1f}%</div><p>Confidence</p>', unsafe_allow_html=True)
 
     st.progress(score)
+
+    st.write("### Molecular Properties")
+    st.write(props)
