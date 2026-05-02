@@ -6,7 +6,7 @@ import joblib
 st.set_page_config(page_title="LigandLogic", layout="wide")
 
 # =========================
-# 🎨 STYLE (ONLY HERO UPGRADE)
+# 🎨 STYLE (REFINED UI)
 # =========================
 st.markdown("""
 <style>
@@ -18,60 +18,60 @@ st.markdown("""
 /* HERO */
 .hero{
   text-align:center;
-  margin-top:20px;
+  margin-top:30px;
 }
 
 /* ICON */
 .icon{
-  font-size:22px;
-  margin-bottom:6px;
-  opacity:0.9;
+  font-size:42px;
+  margin-bottom:10px;
 }
 
 /* TITLE */
 .title{
-  font-family: Inter, sans-serif;
+  font-family: 'Inter', sans-serif;
   font-weight:800;
-  font-size:58px;
+  font-size:60px;
   letter-spacing:-1px;
   background: linear-gradient(90deg,#00D1FF,#6366F1);
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
-  text-shadow: 0px 0px 20px rgba(0,209,255,0.25);
+  text-shadow: 0px 0px 25px rgba(0,209,255,0.25);
 }
 
 /* TAGLINE */
 .tagline{
-  font-family: Inter, sans-serif;
-  font-weight:400;
+  font-family: 'Inter', sans-serif;
+  font-style: italic;
   font-size:18px;
   color:#94A3B8;
-  margin-top:10px;
+  margin-top:8px;
 }
 
-/* TAGLINE BADGES */
+/* BADGES */
 .badges{
-  margin-top:10px;
+  margin-top:12px;
 }
 .badge{
   display:inline-block;
-  padding:6px 12px;
+  padding:6px 14px;
   border-radius:20px;
   border:1px solid #30363D;
-  margin:5px;
-  font-size:12px;
+  margin:6px;
+  font-size:13px;
   color:#CBD5E1;
+  background: rgba(255,255,255,0.03);
 }
 
 /* DIVIDER */
 .divider{
   height:1px;
-  margin:20px auto;
+  margin:22px auto;
   width:60%;
   background: linear-gradient(90deg, transparent, #00D1FF, transparent);
 }
 
-/* KEEP REST SAME */
+/* SECTION */
 .section{
   margin-top:28px;
   font-size:24px;
@@ -79,6 +79,7 @@ st.markdown("""
   color:#00D1FF;
 }
 
+/* CARD */
 .card{
   background: rgba(255,255,255,0.05);
   backdrop-filter: blur(12px);
@@ -87,6 +88,7 @@ st.markdown("""
   padding:20px;
 }
 
+/* INPUT */
 input{
   font-family: monospace !important;
   background:transparent !important;
@@ -95,6 +97,7 @@ input{
   border-radius:12px !important;
 }
 
+/* BUTTON */
 .stButton>button{
   background: linear-gradient(90deg,#6366F1,#00D1FF);
   border-radius:14px;
@@ -102,6 +105,7 @@ input{
   font-weight:600;
 }
 
+/* METRIC */
 .metric{
   font-size:32px;
   font-weight:600;
@@ -110,11 +114,12 @@ input{
   -webkit-text-fill-color:transparent;
 }
 
+/* DECISION */
 .decision{
   text-align:center;
-  font-size:22px;
+  font-size:24px;
   font-weight:700;
-  padding:16px;
+  padding:18px;
   border-radius:14px;
   margin-top:10px;
 }
@@ -122,6 +127,7 @@ input{
 .mid{background:rgba(255,209,102,0.1); color:#FFD166;}
 .bad{background:rgba(239,71,111,0.1); color:#EF476F;}
 
+/* LED */
 .led{
   height:10px;width:10px;border-radius:50%;
   display:inline-block;margin-right:6px;
@@ -133,7 +139,7 @@ input{
 """, unsafe_allow_html=True)
 
 # =========================
-# MODEL SAFE LOAD
+# MODEL
 # =========================
 try:
     model = joblib.load("model.pkl")
@@ -146,7 +152,7 @@ except:
     model = Dummy()
 
 # =========================
-# HERO (UPDATED)
+# HERO (FIXED)
 # =========================
 st.markdown("""
 <div class="hero">
@@ -155,9 +161,9 @@ st.markdown("""
   <div class="tagline">Where machine learning meets molecular intelligence</div>
 
   <div class="badges">
-    <span class="badge">AI/ML</span>
-    <span class="badge">Drug Discovery</span>
-    <span class="badge">Molecular Intelligence</span>
+    <span class="badge">🤖 AI/ML</span>
+    <span class="badge">🧪 Drug Discovery</span>
+    <span class="badge">🧬 Molecular Intelligence</span>
   </div>
 
   <div class="divider"></div>
@@ -165,11 +171,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =========================
-# INPUT
+# INPUT (NO EXTRA BOX)
 # =========================
-st.markdown('<div class="card">', unsafe_allow_html=True)
 smiles = st.text_input("SMILES Input", placeholder="e.g. CCO")
-st.markdown('</div>', unsafe_allow_html=True)
 
 # =========================
 # FEATURES (UNCHANGED)
@@ -204,7 +208,7 @@ def featurize(_):
     }])
 
 # =========================
-# REST OF YOUR CODE (UNCHANGED)
+# ACTION (UNCHANGED)
 # =========================
 if st.button("Analyze Molecule"):
 
@@ -236,5 +240,4 @@ if st.button("Analyze Molecule"):
     cols = st.columns(4)
     for i,(k,v) in enumerate(features.iloc[0].items()):
         cols[i%4].metric(k, f"{v:.2f}")
-
 
