@@ -1,124 +1,76 @@
 import streamlit as st
 import pandas as pd
 import joblib
+import requests
 
 st.set_page_config(page_title="LigandLogic", layout="wide")
 
-# =========================
-# 🎨 CUSTOM UI STYLE
-# =========================
+# ================= UI =================
 st.markdown("""
 <style>
-.stApp {
-    background: #002e5d;
-    color: white;
-}
+.stApp { background: #002e5d; color: white; }
+.title { text-align:center; font-size:46px; font-weight:700; color:#fbd786; }
+.tagline { text-align:center; font-style:italic; color:#d1d5db; margin-bottom:20px; }
 
-/* TITLE */
-.title {
-    text-align: center;
-    font-size: 48px;
-    font-weight: 800;
-    background: linear-gradient(90deg,#ff4e50,#f9d423);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-/* TAGLINE */
-.tagline {
-    text-align: center;
-    font-size: 16px;
-    font-style: italic;
-    color: #fbd786;
-    margin-bottom: 20px;
-}
-
-/* SECTION HEAD */
-.section {
-    font-size: 22px;
-    margin-top: 30px;
-    font-weight: 600;
-}
-
-/* INPUT BOXES */
-.stNumberInput input {
-    background: linear-gradient(90deg,#554023,#c99846);
-    color: white !important;
-    border-radius: 10px;
-}
-
-/* BUTTON */
 .stButton>button {
-    background: linear-gradient(90deg,#ff512f,#dd2476);
-    color: white;
-    border-radius: 12px;
-    height: 3em;
-    font-weight: bold;
+    background: linear-gradient(90deg,#ff4e50,#f9d423);
+    color:white; border-radius:10px; height:3em;
 }
 
-/* RESULT BOX */
-.result {
-    text-align: center;
-    font-size: 26px;
-    font-weight: 700;
-    padding: 15px;
-    border-radius: 10px;
-    margin-top: 15px;
-}
+.result { text-align:center; font-size:24px; font-weight:700; padding:12px; border-radius:10px; }
+.good { background:#22c55e; }
+.mid { background:#facc15; color:black; }
+.bad { background:#ef4444; }
 
-.good { background: linear-gradient(90deg,#fbd786,#f7797d); color: black; }
-.mid { background: linear-gradient(90deg,#fbd3e9,#bb377d); color: white; }
-.bad { background: linear-gradient(90deg,#ff512f,#dd2476); color: white; }
-
-/* METRIC */
-.metric {
-    font-size: 28px;
-    font-weight: 600;
-}
 </style>
 """, unsafe_allow_html=True)
 
-# =========================
-# HEADER
-# =========================
 st.markdown('<div class="title">LigandLogic</div>', unsafe_allow_html=True)
 st.markdown('<div class="tagline">where machine learning meets molecular intelligence</div>', unsafe_allow_html=True)
 
-# =========================
-# LOAD MODEL
-# =========================
+# ================= LOAD MODEL =================
 model = joblib.load("model.pkl")
 
-# =========================
-# INPUT SECTION
-# =========================
-st.markdown('<div class="section">Enter Molecular Properties</div>', unsafe_allow_html=True)
+# ================= FUNCTION: GET DATA FROM PUBCHEM =================
+def get_properties(smiles):
+    url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/{smiles}/property/MolecularWeight,XLogP,HBondDonorCount,HBondAcceptorCount/JSON"
+    
+    try:
+        res = requests.get(url)
+        data = res.json()
 
-col1, col2 = st.columns(2)
+        props = data['PropertyTable']['Properties'][0]
 
-with col1:
-    MolWt = st.number_input("Molecular Weight", 0.0, 1000.0, 180.0)
-    MolLogP = st.number_input("LogP", 0.0, 10.0, 2.0)
-    TPSA = st.number_input("TPSA", 0.0, 200.0, 80.0)
+        return {
+            'MolWt': props.get('MolecularWeight', 0),
+            'MolLogP': props.get('XLogP', 0),
+            'NumHDonors': props.get('HBondDonorCount', 0),
+            'NumHAcceptors': props.get('HBondAcceptorCount', 0)
+        }
 
-with col2:
-    NumHDonors = st.number_input("H Donors", 0, 10, 1)
-    NumHAcceptors = st.number_input("H Acceptors", 0, 15, 3)
-    HeavyAtomCount = st.number_input("Heavy Atom Count", 0, 100, 20)
+    except:
+        return None
 
-# =========================
-# PREDICTION
-# =========================
+# ================= INPUT =================
+smiles = st.text_input("Enter SMILES", placeholder="e.g. CCO")
+
+# ================= ACTION =================
 if st.button("Analyze Molecule"):
 
-    # MATCH MODEL FEATURES
+    props = get_properties(smiles)
+
+    if props is None:
+        st.error("Invalid SMILES or API failed ❌")
+        st.stop()
+
+    # ================= FEATURE MATCH =================
     features = pd.DataFrame([{
-        'MolWt': MolWt,
-        'MolLogP': MolLogP,
+        'MolWt': props['MolWt'],
+        'MolLogP': props['MolLogP'],
         'MolMR': 0,
-        'HeavyAtomCount': HeavyAtomCount,
-        'NumHAcceptors': NumHAcceptors,
-        'NumHDonors': NumHDonors,
+        'HeavyAtomCount': 0,
+        'NumHAcceptors': props['NumHAcceptors'],
+        'NumHDonors': props['NumHDonors'],
         'NumHeteroatoms': 0,
         'NumRotatableBonds': 0,
         'NumValenceElectrons': 0,
@@ -126,18 +78,19 @@ if st.button("Analyze Molecule"):
         'NumSaturatedRings': 0,
         'NumAliphaticRings': 0,
         'RingCount': 0,
-        'TPSA': TPSA,
+        'TPSA': 0,
         'LabuteASA': 0,
         'BalabanJ': 0,
         'BertzCT': 0
     }])
 
+    # ================= PREDICT =================
     pred = model.predict(features)[0]
 
     score = float((pred + 10) / 10)
     score = max(0, min(score, 1))
 
-    # DECISION
+    # ================= DECISION =================
     if score >= 0.7:
         decision, cls = "DRUG-LIKE", "good"
     elif score >= 0.4:
@@ -145,13 +98,14 @@ if st.button("Analyze Molecule"):
     else:
         decision, cls = "NOT DRUG-LIKE", "bad"
 
-    # =========================
-    # OUTPUT
-    # =========================
+    # ================= OUTPUT =================
     st.markdown(f'<div class="result {cls}">{decision}</div>', unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
-    col1.markdown(f'<div class="metric">{score:.2f}</div><p>AI Score</p>', unsafe_allow_html=True)
-    col2.markdown(f'<div class="metric">{score*100:.1f}%</div><p>Confidence</p>', unsafe_allow_html=True)
+    col1.write(f"AI Score: {score:.2f}")
+    col2.write(f"Confidence: {score*100:.1f}%")
 
     st.progress(score)
+
+    st.subheader("Extracted Molecular Properties")
+    st.write(props)
