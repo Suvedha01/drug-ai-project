@@ -6,7 +6,7 @@ import joblib
 st.set_page_config(page_title="LigandLogic", layout="wide")
 
 # =========================
-# 🎨 STYLE (Hero + accents)
+# 🎨 STYLE (ONLY HERO UPGRADE)
 # =========================
 st.markdown("""
 <style>
@@ -16,9 +16,19 @@ st.markdown("""
 }
 
 /* HERO */
-.hero{ text-align:center; margin-top:10px; }
-.logo{ font-size:22px; margin-bottom:6px; opacity:.9; }
+.hero{
+  text-align:center;
+  margin-top:20px;
+}
 
+/* ICON */
+.icon{
+  font-size:22px;
+  margin-bottom:6px;
+  opacity:0.9;
+}
+
+/* TITLE */
 .title{
   font-family: Inter, sans-serif;
   font-weight:800;
@@ -27,36 +37,48 @@ st.markdown("""
   background: linear-gradient(90deg,#00D1FF,#6366F1);
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
-  text-shadow: 0 0 20px rgba(0,209,255,0.25);
+  text-shadow: 0px 0px 20px rgba(0,209,255,0.25);
 }
 
+/* TAGLINE */
 .tagline{
   font-family: Inter, sans-serif;
   font-weight:400;
   font-size:18px;
   color:#94A3B8;
-  margin-top:8px;
+  margin-top:10px;
 }
 
-/* badges */
+/* TAGLINE BADGES */
+.badges{
+  margin-top:10px;
+}
 .badge{
   display:inline-block;
   padding:6px 12px;
   border-radius:20px;
   border:1px solid #30363D;
-  margin:6px;
+  margin:5px;
   font-size:12px;
   color:#CBD5E1;
 }
 
-/* divider */
-.hr{
+/* DIVIDER */
+.divider{
   height:1px;
+  margin:20px auto;
+  width:60%;
   background: linear-gradient(90deg, transparent, #00D1FF, transparent);
-  margin:18px 0 22px 0;
 }
 
-/* CARD */
+/* KEEP REST SAME */
+.section{
+  margin-top:28px;
+  font-size:24px;
+  font-weight:600;
+  color:#00D1FF;
+}
+
 .card{
   background: rgba(255,255,255,0.05);
   backdrop-filter: blur(12px);
@@ -65,7 +87,6 @@ st.markdown("""
   padding:20px;
 }
 
-/* INPUT */
 input{
   font-family: monospace !important;
   background:transparent !important;
@@ -74,7 +95,6 @@ input{
   border-radius:12px !important;
 }
 
-/* BUTTON */
 .stButton>button{
   background: linear-gradient(90deg,#6366F1,#00D1FF);
   border-radius:14px;
@@ -82,7 +102,6 @@ input{
   font-weight:600;
 }
 
-/* METRICS */
 .metric{
   font-size:32px;
   font-weight:600;
@@ -91,18 +110,25 @@ input{
   -webkit-text-fill-color:transparent;
 }
 
-/* DECISION */
 .decision{
   text-align:center;
-  font-size:24px;
+  font-size:22px;
   font-weight:700;
-  padding:18px;
+  padding:16px;
   border-radius:14px;
   margin-top:10px;
 }
 .good{background:rgba(0,255,163,0.1); color:#00FFA3;}
 .mid{background:rgba(255,209,102,0.1); color:#FFD166;}
 .bad{background:rgba(239,71,111,0.1); color:#EF476F;}
+
+.led{
+  height:10px;width:10px;border-radius:50%;
+  display:inline-block;margin-right:6px;
+}
+.green{background:#00FFA3;}
+.yellow{background:#FFD166;}
+.red{background:#EF476F;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -120,21 +146,21 @@ except:
     model = Dummy()
 
 # =========================
-# HERO (NEW)
+# HERO (UPDATED)
 # =========================
 st.markdown("""
 <div class="hero">
-  <div class="logo">🧬 LigandLogic</div>
+  <div class="icon">🧬</div>
   <div class="title">LigandLogic</div>
-  <div class="tagline">AI-driven molecular intelligence for next-gen drug discovery</div>
+  <div class="tagline">Where machine learning meets molecular intelligence</div>
 
-  <div>
-    <span class="badge">⚡ Machine Learning</span>
-    <span class="badge">🧪 Drug Discovery</span>
-    <span class="badge">📊 Predictive Ranking</span>
+  <div class="badges">
+    <span class="badge">AI/ML</span>
+    <span class="badge">Drug Discovery</span>
+    <span class="badge">Molecular Intelligence</span>
   </div>
 
-  <div class="hr"></div>
+  <div class="divider"></div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -146,7 +172,7 @@ smiles = st.text_input("SMILES Input", placeholder="e.g. CCO")
 st.markdown('</div>', unsafe_allow_html=True)
 
 # =========================
-# FEATURES
+# FEATURES (UNCHANGED)
 # =========================
 feature_order = [
  'MolWt','MolLogP','MolMR','HeavyAtomCount','NumHAcceptors',
@@ -178,7 +204,7 @@ def featurize(_):
     }])
 
 # =========================
-# ACTION
+# REST OF YOUR CODE (UNCHANGED)
 # =========================
 if st.button("Analyze Molecule"):
 
@@ -196,17 +222,19 @@ if st.button("Analyze Molecule"):
     else:
         decision, cls = "NOT DRUG-LIKE", "bad"
 
-    st.markdown("## Results")
-
-    # BIG DECISION
+    st.markdown('<div class="section">Results</div>', unsafe_allow_html=True)
     st.markdown(f'<div class="decision {cls}">{decision}</div>', unsafe_allow_html=True)
 
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
     col1.markdown(f'<div class="metric">{score:.2f}</div><p>AI Score</p>', unsafe_allow_html=True)
     col2.markdown(f'<div class="metric">{score*100:.1f}%</div><p>Confidence</p>', unsafe_allow_html=True)
+    col3.markdown(f'<span class="led {"green" if score>0.7 else "yellow" if score>0.5 else "red"}"></span>{"Model Loaded" if model_loaded else "Fallback"}', unsafe_allow_html=True)
 
     st.progress(score)
 
-
+    st.markdown('<div class="section">Molecular Properties</div>', unsafe_allow_html=True)
+    cols = st.columns(4)
+    for i,(k,v) in enumerate(features.iloc[0].items()):
+        cols[i%4].metric(k, f"{v:.2f}")
 
 
