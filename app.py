@@ -6,13 +6,14 @@ import joblib
 st.set_page_config(page_title="LigandLogic", layout="wide")
 
 # =========================
-# 🎨 STYLE (FINAL FIXED)
+# 🎨 STYLE (FINAL POLISH ONLY)
 # =========================
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@500&family=Poppins:wght@900&display=swap');
 
-/* NOTE: MilkyRain is not on Google Fonts, fallback used */
+/* NOTE: Playwrite New Zealand Guides is not a standard web font.
+   If not loaded, it will fallback to Poppins */
 .stApp{
   background: radial-gradient(circle at 50% 10%, #0F172A, #0B0E14);
   color:#E6EDF3;
@@ -33,7 +34,7 @@ st.markdown("""
 
 /* TITLE */
 .title{
-  font-family: 'MilkyRain', 'Poppins', sans-serif;
+  font-family: 'Playwrite New Zealand Guides', 'Poppins', sans-serif;
   font-size:48px;
   font-weight:800;
   letter-spacing:-1px;
@@ -42,13 +43,15 @@ st.markdown("""
   -webkit-text-fill-color:transparent;
 }
 
-/* TAGLINE */
+/* TAGLINE (FIXED) */
 .tagline{
   font-family: 'Poppins', sans-serif;
   font-weight:900;
   font-size:15px;
   color:#94A3B8;
   margin-top:6px;
+  font-style: italic;
+  text-transform: lowercase;
 }
 
 /* TAGS */
@@ -66,12 +69,12 @@ st.markdown("""
   color:white;
 }
 
-/* COLOR TAGS (like button) */
-.tag1{background: linear-gradient(90deg,#6366F1,#00D1FF);}
-.tag2{background: linear-gradient(90deg,#00D1FF,#00FFA3);}
-.tag3{background: linear-gradient(90deg,#8B5CF6,#6366F1);}
+/* DISTINCT GRADIENT TAGS */
+.tag1{background: linear-gradient(90deg,#6366F1,#00D1FF);}      /* AI/ML */
+.tag2{background: linear-gradient(90deg,#00FFA3,#00D1FF);}      /* Drug Discovery */
+.tag3{background: linear-gradient(90deg,#8B5CF6,#EC4899);}      /* Molecular Intelligence */
 
-/* SECTION */
+/* KEEP REST SAME */
 .section{
   margin-top:28px;
   font-size:24px;
@@ -79,7 +82,6 @@ st.markdown("""
   color:#00D1FF;
 }
 
-/* INPUT */
 input{
   font-family: monospace !important;
   background:transparent !important;
@@ -88,7 +90,6 @@ input{
   border-radius:12px !important;
 }
 
-/* BUTTON */
 .stButton>button{
   background: linear-gradient(90deg,#6366F1,#00D1FF);
   border-radius:14px;
@@ -96,7 +97,6 @@ input{
   font-weight:600;
 }
 
-/* METRIC */
 .metric{
   font-size:32px;
   font-weight:600;
@@ -105,7 +105,6 @@ input{
   -webkit-text-fill-color:transparent;
 }
 
-/* DECISION */
 .decision{
   text-align:center;
   font-size:24px;
@@ -118,7 +117,6 @@ input{
 .mid{background:rgba(255,209,102,0.1); color:#FFD166;}
 .bad{background:rgba(239,71,111,0.1); color:#EF476F;}
 
-/* LED */
 .led{
   height:10px;width:10px;border-radius:50%;
   display:inline-block;margin-right:6px;
@@ -143,18 +141,18 @@ except:
     model = Dummy()
 
 # =========================
-# HERO (FIXED)
+# HERO (UPDATED)
 # =========================
 st.markdown("""
 <div class="hero">
   <div class="icon">🧬</div>
   <div class="title">LigandLogic</div>
-  <div class="tagline">WHERE MACHINE LEARNING MEETS MOLECULAR INTELLIGENCE</div>
+  <div class="tagline">where machine learning meets molecular intelligence</div>
 
   <div class="tags">
     <span class="tag tag1">AI/ML</span>
-    <span class="tag tag2">DRUG DISCOVERY</span>
-    <span class="tag tag3">MOLECULAR INTELLIGENCE</span>
+    <span class="tag tag2">Drug Discovery</span>
+    <span class="tag tag3">Molecular Intelligence</span>
   </div>
 </div>
 """, unsafe_allow_html=True)
@@ -229,6 +227,8 @@ if st.button("Analyze Molecule"):
     cols = st.columns(4)
     for i,(k,v) in enumerate(features.iloc[0].items()):
         cols[i%4].metric(k, f"{v:.2f}")
+
+
 
 
 
