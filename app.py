@@ -163,15 +163,33 @@ if st.button("Analyze Molecule"):
     score = max(0.0, min(score, 1.0))
 
     # =========================
+# RULE-BASED SCORE (ADD THIS)
+# =========================
+rule_score = 1.0
+
+if props['MolWt'] > 500:
+    rule_score -= 0.2
+if props['MolLogP'] > 5:
+    rule_score -= 0.2
+if props['NumHDonors'] > 5:
+    rule_score -= 0.2
+if props['NumHAcceptors'] > 10:
+    rule_score -= 0.2
+
+rule_score = max(0.0, rule_score)
+
+# FINAL COMBINED SCORE
+final_score = (score + rule_score) / 2
+
+    # =========================
     # DECISION
     # =========================
-    if score >= 0.7:
-        decision, cls = "DRUG-LIKE", "good"
-    elif score >= 0.4:
-        decision, cls = "MODERATE", "mid"
-    else:
-        decision, cls = "NOT DRUG-LIKE", "bad"
-
+    if final_score >= 0.7:
+    decision, cls = "DRUG-LIKE", "good"
+elif final_score >= 0.4:
+    decision, cls = "MODERATE", "mid"
+else:
+    decision, cls = "NOT DRUG-LIKE", "bad"
     # =========================
     # OUTPUT
     # =========================
