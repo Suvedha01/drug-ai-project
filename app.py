@@ -5,178 +5,164 @@ import requests
 
 st.set_page_config(page_title="LigandLogic", layout="wide")
 
-# =========================
-# 🎨 UI STYLE (CLEAN + DARK)
-# =========================
+# ================= UI =================
 st.markdown("""
 <style>
 .stApp {
-    background: linear-gradient(180deg, #0b1f3a, #002e5d);
+    background: linear-gradient(180deg,#0f2027,#203a43,#2c5364);
     color: #EAEAEA;
 }
 
 /* TITLE */
 .title {
-    text-align: center;
-    font-size: 48px;
-    font-weight: 700;
-    color: #fbd786;
+    text-align:center;
+    font-size:48px;
+    font-weight:700;
+    background: linear-gradient(90deg,#fbd786,#f7797d);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
 }
 
 /* TAGLINE */
 .tagline {
-    text-align: center;
-    font-size: 16px;
-    font-style: italic;
-    color: #cbd5e1;
-    margin-bottom: 25px;
+    text-align:center;
+    font-size:16px;
+    font-style:italic;
+    color:#cbd5e1;
+    margin-bottom:25px;
 }
 
 /* INPUT */
 input {
-    background-color: #1e3a5f !important;
-    color: white !important;
-    border-radius: 10px !important;
+    background:#1e293b !important;
+    color:white !important;
+    border-radius:10px !important;
 }
 
 /* BUTTON */
 .stButton>button {
-    background: linear-gradient(90deg,#ff4e50,#f9d423);
-    color: white;
-    border-radius: 12px;
-    height: 3em;
-    font-weight: 600;
+    background: linear-gradient(90deg,#ff512f,#dd2476);
+    color:white;
+    border-radius:12px;
+    height:3em;
+    font-weight:600;
 }
 
-/* RESULT BOX */
+/* RESULT */
 .result {
-    text-align: center;
-    font-size: 26px;
-    font-weight: 700;
-    padding: 15px;
-    border-radius: 12px;
-    margin-top: 20px;
+    text-align:center;
+    font-size:28px;
+    font-weight:700;
+    padding:18px;
+    border-radius:12px;
+    margin-top:20px;
 }
 
-.good { background: #22c55e; }
-.mid { background: #facc15; color: black; }
-.bad { background: #ef4444; }
+.good { background:linear-gradient(90deg,#00c853,#b2ff59); color:black;}
+.mid { background:linear-gradient(90deg,#f9d423,#ff4e50);}
+.bad { background:linear-gradient(90deg,#ff416c,#ff4b2b);}
 
-/* METRICS */
-.metric {
-    font-size: 24px;
-    font-weight: 600;
+/* CARD */
+.card {
+    background: rgba(255,255,255,0.05);
+    padding:15px;
+    border-radius:12px;
+    margin-top:10px;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# =========================
-# HEADER
-# =========================
 st.markdown('<div class="title">LigandLogic</div>', unsafe_allow_html=True)
 st.markdown('<div class="tagline">where machine learning meets molecular intelligence</div>', unsafe_allow_html=True)
 
-# =========================
-# LOAD MODEL
-# =========================
+# ================= MODEL =================
 model = joblib.load("model.pkl")
 
-# =========================
-# PUBCHEM API FUNCTION
-# =========================
-def get_properties(smiles):
+# ================= API =================
+def get_props(smiles):
     url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/{smiles}/property/MolecularWeight,XLogP,HBondDonorCount,HBondAcceptorCount/JSON"
-    
     try:
         res = requests.get(url)
         data = res.json()
-        props = data['PropertyTable']['Properties'][0]
+        p = data['PropertyTable']['Properties'][0]
 
         return {
-            'MolWt': props.get('MolecularWeight', 0),
-            'MolLogP': props.get('XLogP', 0) or 0,
-            'NumHDonors': props.get('HBondDonorCount', 0),
-            'NumHAcceptors': props.get('HBondAcceptorCount', 0)
+            "MolWt": p.get("MolecularWeight",0),
+            "LogP": p.get("XLogP",0) or 0,
+            "Donors": p.get("HBondDonorCount",0),
+            "Acceptors": p.get("HBondAcceptorCount",0)
         }
     except:
         return None
 
-# =========================
-# INPUT
-# =========================
-smiles = st.text_input("Enter SMILES", placeholder="e.g. CC(=O)OC1=CC=CC=C1C(=O)O")
+# ================= INPUT =================
+smiles = st.text_input("🔬 Enter SMILES", placeholder="e.g. CC(=O)OC1=CC=CC=C1C(=O)O")
 
-# =========================
-# REQUIRED MODEL FEATURES
-# =========================
-required_cols = [
+# ================= ACTION =================
+if st.button("🚀 Analyze"):
+
+    props = get_props(smiles)
+
+    if props is None:
+        st.error("Invalid SMILES ❌")
+        st.stop()
+
+    # ================= FEATURE VECTOR =================
+    cols = [
  'MolWt','MolLogP','MolMR','HeavyAtomCount',
  'NumHAcceptors','NumHDonors','NumHeteroatoms',
  'NumRotatableBonds','NumValenceElectrons',
  'NumAromaticRings','NumSaturatedRings',
  'NumAliphaticRings','RingCount','TPSA',
  'LabuteASA','BalabanJ','BertzCT'
-]
+    ]
 
-# =========================
-# PREDICTION
-# =========================
-if st.button("Analyze Molecule"):
+    data = {c:0.0 for c in cols}
 
-    props = get_properties(smiles)
+    data['MolWt'] = float(props["MolWt"])
+    data['MolLogP'] = float(props["LogP"])
+    data['NumHDonors'] = float(props["Donors"])
+    data['NumHAcceptors'] = float(props["Acceptors"])
 
-    if props is None:
-        st.error("❌ Invalid SMILES or API failed")
-        st.stop()
+    df = pd.DataFrame([[data[c] for c in cols]], columns=cols)
 
-    # =========================
-    # BUILD FEATURE VECTOR CORRECTLY
-    # =========================
-    features = {}
+    # ================= ML SCORE =================
+    pred = model.predict(df)[0]
+    score = float((pred + 10)/10)
+    score = max(0,min(score,1))
 
-    # Fill real values
-    features['MolWt'] = float(props['MolWt'])
-    features['MolLogP'] = float(props['MolLogP'])
-    features['NumHDonors'] = float(props['NumHDonors'])
-    features['NumHAcceptors'] = float(props['NumHAcceptors'])
+    # ================= RULE CORRECTION =================
+    penalty = 0
 
-    # Fill missing columns with 0
-    for col in required_cols:
-        if col not in features:
-            features[col] = 0.0
+    if props["LogP"] > 5: penalty += 0.3
+    if props["MolWt"] > 500: penalty += 0.2
+    if props["Donors"] == 0 and props["Acceptors"] == 0:
+        penalty += 0.4   # long alkane case
 
-    # Convert properly
-    features_df = pd.DataFrame([[features[col] for col in required_cols]], columns=required_cols)
-    features_df = features_df.astype(float)
+    final_score = max(0, score - penalty)
 
-    # =========================
-    # MODEL PREDICTION
-    # =========================
-    pred = model.predict(features_df)[0]
-
-    score = float((pred + 10) / 10)
-    score = max(0.0, min(score, 1.0))
-
-    # =========================
-    # DECISION
-    # =========================
-    if score >= 0.7:
-        decision, cls = "DRUG-LIKE", "good"
-    elif score >= 0.4:
-        decision, cls = "MODERATE", "mid"
+    # ================= DECISION =================
+    if final_score >= 0.7:
+        label, cls = "DRUG-LIKE", "good"
+    elif final_score >= 0.4:
+        label, cls = "MODERATE", "mid"
     else:
-        decision, cls = "NOT DRUG-LIKE", "bad"
+        label, cls = "NOT DRUG-LIKE", "bad"
 
-    # =========================
-    # OUTPUT
-    # =========================
-    st.markdown(f'<div class="result {cls}">{decision}</div>', unsafe_allow_html=True)
+    # ================= OUTPUT =================
+    st.markdown(f'<div class="result {cls}">{label}</div>', unsafe_allow_html=True)
 
-    col1, col2 = st.columns(2)
-    col1.markdown(f'<div class="metric">AI Score: {score:.2f}</div>', unsafe_allow_html=True)
-    col2.markdown(f'<div class="metric">Confidence: {score*100:.1f}%</div>', unsafe_allow_html=True)
+    col1,col2 = st.columns(2)
+    col1.metric("Score", f"{final_score:.2f}")
+    col2.metric("Confidence", f"{final_score*100:.1f}%")
 
-    st.progress(score)
+    st.progress(final_score)
 
-    st.subheader("Extracted Molecular Properties")
-    st.write(props)
+    # ================= CLEAN PROPERTY DISPLAY =================
+    st.markdown("### 🧪 Key Molecular Insights")
+
+    c1,c2,c3,c4 = st.columns(4)
+    c1.metric("Mol Weight", f"{props['MolWt']:.1f}")
+    c2.metric("LogP", f"{props['LogP']}")
+    c3.metric("H Donors", props["Donors"])
+    c4.metric("H Acceptors", props["Acceptors"])
