@@ -3,77 +3,87 @@ import joblib
 import pandas as pd
 import numpy as np
 
-# Page config
 st.set_page_config(page_title="LigandLogic", layout="wide")
 
-# ===== UI STYLING =====
+# ===== ADVANCED UI =====
 st.markdown("""
 <style>
 
 /* Background */
 .stApp {
-    background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+    background: radial-gradient(circle at 20% 30%, #1f1c2c, #928dab);
+    color: white;
 }
 
-/* Title */
-.title {
-    font-size: 48px;
-    font-weight: 700;
-    color: #1a1a1a;
+/* Hero Title */
+.hero {
+    font-size: 64px;
+    font-weight: 800;
     text-align: center;
-    animation: fadeIn 1.5s ease-in-out;
+    letter-spacing: 2px;
+    background: linear-gradient(90deg, #00f5d4, #9b5de5);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-/* Subtitle */
-.subtitle {
+/* Tagline */
+.tagline {
     text-align: center;
-    color: #555;
-    margin-bottom: 30px;
+    font-size: 20px;
+    color: #e0e0e0;
+    margin-bottom: 40px;
 }
 
-/* Glass Card */
+/* Glass card */
 .card {
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(10px);
+    background: rgba(255,255,255,0.08);
     padding: 25px;
     border-radius: 20px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-    transition: 0.3s;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 0 30px rgba(0,255,200,0.2);
 }
-.card:hover {
-    transform: translateY(-5px);
+
+/* Input box fix */
+input {
+    color: white !important;
+    background-color: rgba(255,255,255,0.1) !important;
+    border-radius: 10px !important;
 }
 
 /* Button */
 .stButton>button {
-    background: linear-gradient(90deg, #6a11cb, #2575fc);
-    color: white;
-    border-radius: 12px;
-    height: 3em;
+    background: linear-gradient(90deg,#00f5d4,#9b5de5);
+    color: black;
     font-weight: bold;
+    border-radius: 15px;
+    height: 3.5em;
+    width: 100%;
     transition: 0.3s;
 }
 .stButton>button:hover {
-    transform: scale(1.05);
+    transform: scale(1.08);
 }
 
-/* Animation */
-@keyframes fadeIn {
-    from {opacity: 0;}
-    to {opacity: 1;}
+/* Glow effect */
+.glow {
+    text-align: center;
+    animation: glow 2s infinite alternate;
+}
+@keyframes glow {
+    from {text-shadow: 0 0 10px #00f5d4;}
+    to {text-shadow: 0 0 30px #9b5de5;}
 }
 
 </style>
 """, unsafe_allow_html=True)
 
-# ===== HEADER =====
-st.markdown('<div class="title">🧬 LigandLogic</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">AI-powered Molecular Intelligence & Drug Candidate Ranking</div>', unsafe_allow_html=True)
+# ===== HERO =====
+st.markdown('<div class="hero glow">LigandLogic</div>', unsafe_allow_html=True)
+st.markdown('<div class="tagline">Redefining molecular intelligence through predictive AI-driven ranking</div>', unsafe_allow_html=True)
 
 # Load model
 model = joblib.load("model.pkl")
 
-# Feature order
 feature_order = [
  'MolWt','MolLogP','MolMR','HeavyAtomCount','NumHAcceptors',
  'NumHDonors','NumHeteroatoms','NumRotatableBonds',
@@ -87,20 +97,18 @@ col1, col2 = st.columns([2,1])
 
 with col1:
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    smiles = st.text_input("🔍 Enter SMILES", placeholder="e.g., CCO")
+    smiles = st.text_input("Enter SMILES", placeholder="e.g. CCO")
     st.markdown('</div>', unsafe_allow_html=True)
 
 with col2:
     st.markdown("""
     <div class="card">
-    <b>💡 Example Molecules</b><br><br>
-    CCO<br>
-    CCC<br>
-    CCN
+    <h4>Sample Inputs</h4>
+    CCO<br>CCC<br>CCN
     </div>
     """, unsafe_allow_html=True)
 
-# Feature generator (simulation)
+# Feature generator
 def featurize(smiles):
     return pd.DataFrame([{
         'MolWt': np.random.uniform(200, 500),
@@ -122,32 +130,28 @@ def featurize(smiles):
         'BertzCT': np.random.uniform(0, 1000)
     }])
 
-# ===== BUTTON =====
-if st.button("🚀 Analyze Molecule"):
+# Action
+if st.button("Analyze Molecule"):
 
     with st.spinner("Running AI model..."):
         features = featurize(smiles)
         features = features[feature_order]
         pred = model.predict(features)[0]
 
-    # Score card
     st.markdown(f"""
     <div class="card">
-        <h2 style="color:#6a11cb;">Score: {pred:.3f}</h2>
+        <h2 style="text-align:center;">Score: {pred:.3f}</h2>
     </div>
     """, unsafe_allow_html=True)
 
-    # Progress bar
     st.progress(min(max(pred, 0), 1))
 
-    # Interpretation
     if pred > 0.7:
-        st.success("✅ High potential drug candidate")
+        st.success("High potential drug candidate")
     elif pred > 0.5:
-        st.info("⚡ Moderate potential")
+        st.info("Moderate candidate")
     else:
-        st.warning("⚠️ Low potential")
+        st.warning("Low potential")
 
-# Footer
 st.markdown("---")
-st.markdown("✨ LigandLogic | AI + Bioinformatics Project")
+st.markdown("LigandLogic | AI x Bioinformatics")
