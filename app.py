@@ -196,10 +196,8 @@ else:
     st.markdown(f'<div class="result {cls}">{decision}</div>', unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
-    col1.markdown(f'<div class="metric">{score:.2f}</div><p>AI Score</p>', unsafe_allow_html=True)
-    col2.markdown(f'<div class="metric">{score*100:.1f}%</div><p>Confidence</p>', unsafe_allow_html=True)
-
-    st.progress(score)
-
+    col1.markdown(f'<div class="metric">{final_score:.2f}</div><p>Final Score</p>', unsafe_allow_html=True)
+col2.markdown(f'<div class="metric">{final_score*100:.1f}%</div><p>Confidence</p>', unsafe_allow_html=True)
+st.progress(final_score)
     st.write("### Molecular Properties")
     st.write(props)
