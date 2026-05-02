@@ -6,7 +6,7 @@ import requests
 st.set_page_config(page_title="LigandLogic", layout="wide")
 
 # =========================
-# UI
+# 🎨 CLEAN PROFESSIONAL UI
 # =========================
 st.markdown("""
 <style>
@@ -52,7 +52,7 @@ st.markdown('<div class="tagline">where machine learning meets molecular intelli
 model = joblib.load("model.pkl")
 
 # =========================
-# FEATURE ORDER
+# FEATURE ORDER (CRITICAL)
 # =========================
 feature_order = [
     'MolWt','MolLogP','MolMR','HeavyAtomCount','NumHAcceptors',
@@ -63,7 +63,7 @@ feature_order = [
 ]
 
 # =========================
-# API FUNCTION
+# PUBCHEM API
 # =========================
 def get_properties(smiles):
     try:
@@ -88,7 +88,7 @@ def get_properties(smiles):
 smiles = st.text_input("Enter SMILES", placeholder="e.g. CCO")
 
 # =========================
-# ACTION
+# MAIN ACTION
 # =========================
 if st.button("Analyze Molecule"):
 
@@ -103,7 +103,7 @@ if st.button("Analyze Molecule"):
         st.stop()
 
     # =========================
-    # FEATURE VECTOR
+    # BUILD FEATURE VECTOR
     # =========================
     data = {col: 0.0 for col in feature_order}
 
@@ -125,23 +125,32 @@ if st.button("Analyze Molecule"):
     score = max(0.0, min(score, 1.0))
 
     # =========================
-    # RULE-BASED SCORE
+    # STRONG RULE-BASED FIX
     # =========================
     rule_score = 1.0
 
     if props['MolWt'] > 500:
-        rule_score -= 0.2
+        rule_score -= 0.4
+
     if props['MolLogP'] > 5:
-        rule_score -= 0.2
+        rule_score -= 0.4
+
     if props['NumHDonors'] > 5:
         rule_score -= 0.2
+
     if props['NumHAcceptors'] > 10:
         rule_score -= 0.2
 
+    # 🔥 Critical fix for alkane issue
+    if props['NumHDonors'] == 0 and props['NumHAcceptors'] == 0:
+        rule_score -= 0.6
+
     rule_score = max(0.0, rule_score)
 
-    # FINAL SCORE
-    final_score = (score + rule_score) / 2
+    # =========================
+    # FINAL SCORE (WEIGHTED)
+    # =========================
+    final_score = (0.4 * score) + (0.6 * rule_score)
 
     # =========================
     # DECISION
