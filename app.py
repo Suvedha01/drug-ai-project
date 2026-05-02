@@ -6,82 +6,45 @@ import requests
 st.set_page_config(page_title="LigandLogic", layout="wide")
 
 # =========================
-# 🎨 PREMIUM WHITE UI
+# UI
 # =========================
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&family=Space+Grotesk:wght@600&display=swap');
-
-.stApp {
-    background: linear-gradient(135deg, #ffffff, #f8fafc);
-    color: #1e293b;
+body {
+    background-color: #f8fafc;
 }
-
-.hero {
-    text-align: center;
-    margin-top: 30px;
-}
-
-.icon {
-    font-size: 70px;
-}
-
 .title {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 48px;
-    font-weight: 700;
-    background: linear-gradient(90deg,#6366f1,#ec4899);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    text-align: center;
+    font-size: 45px;
+    font-weight: bold;
 }
-
 .tagline {
-    font-family: 'Inter', sans-serif;
-    font-size: 16px;
-    color: #64748b;
+    text-align: center;
     font-style: italic;
-    margin-top: 5px;
+    color: gray;
+    margin-bottom: 20px;
 }
-
 .stButton>button {
     background: linear-gradient(90deg,#ff4e50,#f9d423);
     color: white;
-    border-radius: 12px;
-    height: 3em;
-    font-weight: 600;
-    border: none;
+    border-radius: 10px;
 }
-
 .result {
     text-align: center;
     font-size: 24px;
-    font-weight: 700;
-    padding: 18px;
-    border-radius: 14px;
+    font-weight: bold;
+    padding: 15px;
+    border-radius: 10px;
     margin-top: 20px;
 }
-
-.good { background: linear-gradient(90deg,#4facfe,#00f2fe); color:white; }
-.mid { background: linear-gradient(90deg,#fbd786,#f7797d); color:black; }
-.bad { background: linear-gradient(90deg,#ff4e50,#dd2476); color:white; }
-
-.metric {
-    font-size: 26px;
-    font-weight: 600;
-}
+.good { background-color: #4ade80; }
+.mid { background-color: #facc15; }
+.bad { background-color: #f87171; }
 </style>
 """, unsafe_allow_html=True)
 
-# =========================
-# HEADER
-# =========================
-st.markdown("""
-<div class="hero">
-    <div class="icon">🧬</div>
-    <div class="title">LigandLogic</div>
-    <div class="tagline">where machine learning meets molecular intelligence</div>
-</div>
-""", unsafe_allow_html=True)
+st.markdown('<div class="title">LigandLogic</div>', unsafe_allow_html=True)
+st.markdown('<div class="tagline">where machine learning meets molecular intelligence</div>', unsafe_allow_html=True)
 
 # =========================
 # LOAD MODEL
@@ -89,7 +52,7 @@ st.markdown("""
 model = joblib.load("model.pkl")
 
 # =========================
-# FEATURE ORDER (CRITICAL)
+# FEATURE ORDER
 # =========================
 feature_order = [
     'MolWt','MolLogP','MolMR','HeavyAtomCount','NumHAcceptors',
@@ -100,7 +63,7 @@ feature_order = [
 ]
 
 # =========================
-# GET PROPERTIES FROM PUBCHEM
+# API FUNCTION
 # =========================
 def get_properties(smiles):
     try:
@@ -130,7 +93,7 @@ smiles = st.text_input("Enter SMILES", placeholder="e.g. CCO")
 if st.button("Analyze Molecule"):
 
     if not smiles:
-        st.error("Please enter a SMILES string")
+        st.error("Enter SMILES first")
         st.stop()
 
     props = get_properties(smiles)
@@ -140,7 +103,7 @@ if st.button("Analyze Molecule"):
         st.stop()
 
     # =========================
-    # BUILD FEATURE VECTOR
+    # FEATURE VECTOR
     # =========================
     data = {col: 0.0 for col in feature_order}
 
@@ -154,50 +117,52 @@ if st.button("Analyze Molecule"):
     features = features.astype(float)
 
     # =========================
-    # PREDICT
+    # MODEL PREDICTION
     # =========================
     pred = model.predict(features)[0]
 
-    # normalize
     score = float((pred + 10) / 10)
     score = max(0.0, min(score, 1.0))
 
     # =========================
-# RULE-BASED SCORE (ADD THIS)
-# =========================
-rule_score = 1.0
+    # RULE-BASED SCORE
+    # =========================
+    rule_score = 1.0
 
-if props['MolWt'] > 500:
-    rule_score -= 0.2
-if props['MolLogP'] > 5:
-    rule_score -= 0.2
-if props['NumHDonors'] > 5:
-    rule_score -= 0.2
-if props['NumHAcceptors'] > 10:
-    rule_score -= 0.2
+    if props['MolWt'] > 500:
+        rule_score -= 0.2
+    if props['MolLogP'] > 5:
+        rule_score -= 0.2
+    if props['NumHDonors'] > 5:
+        rule_score -= 0.2
+    if props['NumHAcceptors'] > 10:
+        rule_score -= 0.2
 
-rule_score = max(0.0, rule_score)
+    rule_score = max(0.0, rule_score)
 
-# FINAL COMBINED SCORE
-final_score = (score + rule_score) / 2
+    # FINAL SCORE
+    final_score = (score + rule_score) / 2
 
     # =========================
     # DECISION
     # =========================
     if final_score >= 0.7:
-    decision, cls = "DRUG-LIKE", "good"
-elif final_score >= 0.4:
-    decision, cls = "MODERATE", "mid"
-else:
-    decision, cls = "NOT DRUG-LIKE", "bad"
+        decision, cls = "DRUG-LIKE", "good"
+    elif final_score >= 0.4:
+        decision, cls = "MODERATE", "mid"
+    else:
+        decision, cls = "NOT DRUG-LIKE", "bad"
+
     # =========================
     # OUTPUT
     # =========================
     st.markdown(f'<div class="result {cls}">{decision}</div>', unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
-    col1.markdown(f'<div class="metric">{final_score:.2f}</div><p>Final Score</p>', unsafe_allow_html=True)
-col2.markdown(f'<div class="metric">{final_score*100:.1f}%</div><p>Confidence</p>', unsafe_allow_html=True)
-st.progress(final_score)
+    col1.write(f"Final Score: {final_score:.2f}")
+    col2.write(f"Confidence: {final_score*100:.1f}%")
+
+    st.progress(final_score)
+
     st.write("### Molecular Properties")
     st.write(props)
