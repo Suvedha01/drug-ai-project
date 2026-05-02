@@ -6,71 +6,80 @@ import requests
 st.set_page_config(page_title="LigandLogic", layout="wide")
 
 # =========================
-# 🎨 CLEAN UI
+# 🎨 PREMIUM UI
 # =========================
 st.markdown("""
 <style>
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;600;800&family=Ubuntu:wght@500&display=swap');
+
 .stApp {
-    background: #002e5d;
+    background: linear-gradient(135deg, #002e5d, #001a33);
     color: white;
-    font-family: 'Poppins', sans-serif;
 }
 
+/* TITLE */
 .title {
-    text-align:center;
-    font-size:42px;
-    font-weight:700;
-    color:#fbd786;
+    text-align: center;
+    font-size: 52px;
+    font-weight: 800;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(90deg, #fbd786, #ff4e50);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
+/* TAGLINE */
 .tagline {
-    text-align:center;
-    font-size:14px;
-    font-style:italic;
-    color:#d1d5db;
-    margin-bottom:20px;
+    text-align: center;
+    font-style: italic;
+    font-size: 16px;
+    color: #e5e7eb;
+    margin-bottom: 25px;
 }
 
+/* INPUT */
+input {
+    background: rgba(255,255,255,0.1) !important;
+    color: white !important;
+    border-radius: 10px !important;
+}
+
+/* BUTTON */
+.stButton>button {
+    background: linear-gradient(90deg,#ff512f,#dd2476);
+    color: white;
+    border-radius: 12px;
+    height: 3em;
+    font-weight: 600;
+    transition: 0.3s;
+}
+.stButton>button:hover {
+    transform: scale(1.05);
+}
+
+/* RESULT */
+.result {
+    text-align: center;
+    font-size: 26px;
+    font-weight: 700;
+    padding: 15px;
+    border-radius: 12px;
+    margin-top: 15px;
+}
+
+.good { background: linear-gradient(90deg,#00FFA3,#00D1FF); color:black; }
+.mid { background: linear-gradient(90deg,#fbd786,#f7797d); color:black; }
+.bad { background: linear-gradient(90deg,#ff4e50,#dd2476); }
+
+/* CARD */
 .card {
     background: rgba(255,255,255,0.08);
-    padding:20px;
-    border-radius:12px;
-    margin-top:15px;
+    padding: 15px;
+    border-radius: 12px;
+    margin-top: 15px;
 }
 
-input {
-    background:#0b3d91 !important;
-    color:white !important;
-    border-radius:10px !important;
-}
-
-/* Button */
-.stButton>button {
-    background: linear-gradient(90deg,#ff4e50,#f9d423);
-    color:white;
-    border-radius:10px;
-    height:3em;
-    font-weight:600;
-}
-
-/* Result */
-.result {
-    text-align:center;
-    font-size:26px;
-    font-weight:700;
-    padding:12px;
-    border-radius:10px;
-    margin-top:15px;
-}
-
-.good { background:#22c55e; }
-.mid { background:#facc15; color:black; }
-.bad { background:#ef4444; }
-
-.metric {
-    font-size:22px;
-    font-weight:600;
-}
 </style>
 """, unsafe_allow_html=True)
 
@@ -86,35 +95,22 @@ st.markdown('<div class="tagline">where machine learning meets molecular intelli
 model = joblib.load("model.pkl")
 
 # =========================
-# FEATURE ORDER (IMPORTANT)
-# =========================
-feature_order = [
- 'MolWt','MolLogP','MolMR','HeavyAtomCount','NumHAcceptors',
- 'NumHDonors','NumHeteroatoms','NumRotatableBonds',
- 'NumValenceElectrons','NumAromaticRings','NumSaturatedRings',
- 'NumAliphaticRings','RingCount','TPSA','LabuteASA',
- 'BalabanJ','BertzCT'
-]
-
-# =========================
-# GET PROPERTIES FROM API
+# PUBCHEM FUNCTION
 # =========================
 def get_properties(smiles):
-    url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/{smiles}/property/MolecularWeight,XLogP,HBondDonorCount,HBondAcceptorCount/JSON"
+    url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/{smiles}/property/MolecularWeight,XLogP,HBondDonorCount,HBondAcceptorCount,TPSA/JSON"
     
     try:
-        res = requests.get(url, timeout=5)
-        if res.status_code != 200:
-            return None
-
+        res = requests.get(url, timeout=10)
         data = res.json()
         props = data['PropertyTable']['Properties'][0]
 
         return {
-            'MolWt': float(props.get('MolecularWeight', 0)),
-            'MolLogP': float(props.get('XLogP', 0) or 0),
-            'NumHDonors': float(props.get('HBondDonorCount', 0)),
-            'NumHAcceptors': float(props.get('HBondAcceptorCount', 0))
+            'MolWt': props.get('MolecularWeight', 0),
+            'MolLogP': props.get('XLogP', 0),
+            'NumHDonors': props.get('HBondDonorCount', 0),
+            'NumHAcceptors': props.get('HBondAcceptorCount', 0),
+            'TPSA': props.get('TPSA', 0)
         }
     except:
         return None
@@ -122,59 +118,50 @@ def get_properties(smiles):
 # =========================
 # INPUT
 # =========================
-st.markdown('<div class="card">', unsafe_allow_html=True)
 smiles = st.text_input("Enter SMILES", placeholder="e.g. CCO")
-st.markdown('</div>', unsafe_allow_html=True)
 
 # =========================
-# ACTION
+# ANALYZE
 # =========================
 if st.button("Analyze Molecule"):
 
     if not smiles:
-        st.error("Please enter SMILES")
+        st.error("Enter a SMILES string first")
         st.stop()
 
     props = get_properties(smiles)
 
     if props is None:
-        st.error("Could not fetch molecule data (try another SMILES)")
+        st.error("Failed to fetch molecule data ❌")
         st.stop()
 
     # =========================
-    # BUILD FEATURES (CORRECT)
+    # FEATURE MATCHING
     # =========================
     features = pd.DataFrame([{
         'MolWt': props['MolWt'],
         'MolLogP': props['MolLogP'],
-        'MolMR': 0.0,
-        'HeavyAtomCount': 0.0,
+        'MolMR': 0,
+        'HeavyAtomCount': 0,
         'NumHAcceptors': props['NumHAcceptors'],
         'NumHDonors': props['NumHDonors'],
-        'NumHeteroatoms': 0.0,
-        'NumRotatableBonds': 0.0,
-        'NumValenceElectrons': 0.0,
-        'NumAromaticRings': 0.0,
-        'NumSaturatedRings': 0.0,
-        'NumAliphaticRings': 0.0,
-        'RingCount': 0.0,
-        'TPSA': 0.0,
-        'LabuteASA': 0.0,
-        'BalabanJ': 0.0,
-        'BertzCT': 0.0
+        'NumHeteroatoms': 0,
+        'NumRotatableBonds': 0,
+        'NumValenceElectrons': 0,
+        'NumAromaticRings': 0,
+        'NumSaturatedRings': 0,
+        'NumAliphaticRings': 0,
+        'RingCount': 0,
+        'TPSA': props['TPSA'],
+        'LabuteASA': 0,
+        'BalabanJ': 0,
+        'BertzCT': 0
     }])
 
-    features = features[feature_order].astype(float)
-
     # =========================
-    # PREDICT
+    # PREDICTION
     # =========================
-    try:
-        pred = model.predict(features)[0]
-    except Exception as e:
-        st.error("Model prediction failed ❌")
-        st.write(features)
-        st.stop()
+    pred = model.predict(features)[0]
 
     score = float((pred + 10) / 10)
     score = max(0, min(score, 1))
@@ -195,10 +182,10 @@ if st.button("Analyze Molecule"):
     st.markdown(f'<div class="result {cls}">{decision}</div>', unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
-    col1.markdown(f'<div class="metric">{score:.2f}</div><p>AI Score</p>', unsafe_allow_html=True)
-    col2.markdown(f'<div class="metric">{score*100:.1f}%</div><p>Confidence</p>', unsafe_allow_html=True)
+    col1.markdown(f"**AI Score:** {score:.2f}")
+    col2.markdown(f"**Confidence:** {score*100:.1f}%")
 
     st.progress(score)
 
-    st.subheader("Extracted Molecular Properties")
+    st.markdown("### Molecular Properties")
     st.write(props)
