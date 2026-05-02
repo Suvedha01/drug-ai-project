@@ -6,10 +6,12 @@ import joblib
 st.set_page_config(page_title="LigandLogic", layout="wide")
 
 # =========================
-# 🎨 STYLE (REFINED UI)
+# 🎨 REFINED PROFESSIONAL UI
 # =========================
 st.markdown("""
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@800&family=Open+Sans:wght@300&family=JetBrains+Mono:wght@500&display=swap');
+
 .stApp{
   background: radial-gradient(circle at 50% 10%, #0F172A, #0B0E14);
   color:#E6EDF3;
@@ -18,74 +20,60 @@ st.markdown("""
 /* HERO */
 .hero{
   text-align:center;
-  margin-top:30px;
+  margin-top:40px;
 }
 
-/* ICON */
+/* DNA ICON */
 .icon{
-  font-size:42px;
+  font-size:90px;
   margin-bottom:10px;
+  filter: drop-shadow(0px 0px 20px rgba(0,209,255,0.3));
 }
 
 /* TITLE */
 .title{
-  font-family: 'Inter', sans-serif;
+  font-family: 'Montserrat', sans-serif;
+  font-size:50px;
   font-weight:800;
-  font-size:60px;
   letter-spacing:-1px;
   background: linear-gradient(90deg,#00D1FF,#6366F1);
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
-  text-shadow: 0px 0px 25px rgba(0,209,255,0.25);
 }
 
 /* TAGLINE */
 .tagline{
-  font-family: 'Inter', sans-serif;
+  font-family: 'Open Sans', sans-serif;
   font-style: italic;
-  font-size:18px;
+  font-size:16px;
   color:#94A3B8;
-  margin-top:8px;
+  margin-top:6px;
 }
 
-/* BADGES */
-.badges{
-  margin-top:12px;
+/* CAPSULE TAGS */
+.tags{
+  margin-top:18px;
 }
-.badge{
+.tag{
   display:inline-block;
-  padding:6px 14px;
-  border-radius:20px;
-  border:1px solid #30363D;
+  padding:8px 18px;
   margin:6px;
+  border-radius:50px;
   font-size:13px;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing:1px;
+  background: rgba(255,255,255,0.05);
+  border:1px solid rgba(0,209,255,0.2);
+  backdrop-filter: blur(10px);
   color:#CBD5E1;
-  background: rgba(255,255,255,0.03);
-}
-
-/* DIVIDER */
-.divider{
-  height:1px;
-  margin:22px auto;
-  width:60%;
-  background: linear-gradient(90deg, transparent, #00D1FF, transparent);
 }
 
 /* SECTION */
 .section{
-  margin-top:28px;
-  font-size:24px;
+  margin-top:30px;
+  font-size:22px;
   font-weight:600;
   color:#00D1FF;
-}
-
-/* CARD */
-.card{
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(12px);
-  border: 1px solid #ffffff22;
-  border-radius:16px;
-  padding:20px;
 }
 
 /* INPUT */
@@ -105,9 +93,9 @@ input{
   font-weight:600;
 }
 
-/* METRIC */
+/* METRICS */
 .metric{
-  font-size:32px;
+  font-size:30px;
   font-weight:600;
   background: linear-gradient(90deg,#00D1FF,#6366F1);
   -webkit-background-clip:text;
@@ -117,12 +105,13 @@ input{
 /* DECISION */
 .decision{
   text-align:center;
-  font-size:24px;
+  font-size:26px;
   font-weight:700;
-  padding:18px;
+  padding:20px;
   border-radius:14px;
-  margin-top:10px;
+  margin-top:15px;
 }
+
 .good{background:rgba(0,255,163,0.1); color:#00FFA3;}
 .mid{background:rgba(255,209,102,0.1); color:#FFD166;}
 .bad{background:rgba(239,71,111,0.1); color:#EF476F;}
@@ -135,6 +124,7 @@ input{
 .green{background:#00FFA3;}
 .yellow{background:#FFD166;}
 .red{background:#EF476F;}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -152,7 +142,7 @@ except:
     model = Dummy()
 
 # =========================
-# HERO (FIXED)
+# HERO
 # =========================
 st.markdown("""
 <div class="hero">
@@ -160,18 +150,16 @@ st.markdown("""
   <div class="title">LigandLogic</div>
   <div class="tagline">Where machine learning meets molecular intelligence</div>
 
-  <div class="badges">
-    <span class="badge">🤖 AI/ML</span>
-    <span class="badge">🧪 Drug Discovery</span>
-    <span class="badge">🧬 Molecular Intelligence</span>
+  <div class="tags">
+    <span class="tag">AI/ML</span>
+    <span class="tag">DRUG DISCOVERY</span>
+    <span class="tag">MOLECULAR INTELLIGENCE</span>
   </div>
-
-  <div class="divider"></div>
 </div>
 """, unsafe_allow_html=True)
 
 # =========================
-# INPUT (NO EXTRA BOX)
+# INPUT
 # =========================
 smiles = st.text_input("SMILES Input", placeholder="e.g. CCO")
 
@@ -208,7 +196,7 @@ def featurize(_):
     }])
 
 # =========================
-# ACTION (UNCHANGED)
+# ACTION
 # =========================
 if st.button("Analyze Molecule"):
 
@@ -219,10 +207,11 @@ if st.button("Analyze Molecule"):
     score = float((pred + 10) / 10)
     score = max(0.0, min(score, 1.0))
 
+    # CLEAN DECISION WORDING
     if score >= 0.75:
-        decision, cls = "DRUG-LIKE CANDIDATE", "good"
+        decision, cls = "DRUG-LIKE", "good"
     elif score >= 0.5:
-        decision, cls = "BORDERLINE CANDIDATE", "mid"
+        decision, cls = "MODERATE POTENTIAL", "mid"
     else:
         decision, cls = "NOT DRUG-LIKE", "bad"
 
@@ -236,8 +225,5 @@ if st.button("Analyze Molecule"):
 
     st.progress(score)
 
-    st.markdown('<div class="section">Molecular Properties</div>', unsafe_allow_html=True)
-    cols = st.columns(4)
-    for i,(k,v) in enumerate(features.iloc[0].items()):
-        cols[i%4].metric(k, f"{v:.2f}")
+
 
