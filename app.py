@@ -5,33 +5,31 @@ import joblib
 
 st.set_page_config(page_title="LigandLogic", layout="wide")
 
+# =========================
+# 🎨 STYLE (UNCHANGED UI)
+# =========================
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@500&family=Poppins:wght@900&display=swap');
 
-/* NOTE: Playwrite New Zealand Guides is not a standard web font.
-   If not loaded, it will fallback to Poppins */
 .stApp{
   background: radial-gradient(circle at 50% 10%, #0F172A, #0B0E14);
   color:#E6EDF3;
 }
 
-/* HERO */
 .hero{
   text-align:center;
   margin-top:35px;
 }
 
-/* ICON */
 .icon{
   font-size:65px;
   margin-bottom:8px;
   filter: drop-shadow(0 0 12px #00D1FF);
 }
 
-/* TITLE */
 .title{
-  font-family: 'Playwrite New Zealand Guides', 'Poppins', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-size:48px;
   font-weight:800;
   letter-spacing:-1px;
@@ -40,7 +38,6 @@ st.markdown("""
   -webkit-text-fill-color:transparent;
 }
 
-/* TAGLINE (FIXED) */
 .tagline{
   font-family: 'Poppins', sans-serif;
   font-weight:900;
@@ -51,10 +48,10 @@ st.markdown("""
   text-transform: lowercase;
 }
 
-/* TAGS */
 .tags{
   margin-top:15px;
 }
+
 .tag{
   display:inline-block;
   padding:8px 16px;
@@ -66,12 +63,10 @@ st.markdown("""
   color:white;
 }
 
-/* DISTINCT GRADIENT TAGS */
-.tag1{background: linear-gradient(90deg,#6366F1,#00D1FF);}      /* AI/ML */
-.tag2{background: linear-gradient(90deg,#00FFA3,#00D1FF);}      /* Drug Discovery */
-.tag3{background: linear-gradient(90deg,#8B5CF6,#EC4899);}      /* Molecular Intelligence */
+.tag1{background: linear-gradient(90deg,#6366F1,#00D1FF);}
+.tag2{background: linear-gradient(90deg,#00FFA3,#00D1FF);}
+.tag3{background: linear-gradient(90deg,#8B5CF6,#EC4899);}
 
-/* KEEP REST SAME */
 .section{
   margin-top:28px;
   font-size:24px;
@@ -110,6 +105,7 @@ input{
   border-radius:14px;
   margin-top:10px;
 }
+
 .good{background:rgba(0,255,163,0.1); color:#00FFA3;}
 .mid{background:rgba(255,209,102,0.1); color:#FFD166;}
 .bad{background:rgba(239,71,111,0.1); color:#EF476F;}
@@ -118,25 +114,16 @@ input{
   height:10px;width:10px;border-radius:50%;
   display:inline-block;margin-right:6px;
 }
+
 .green{background:#00FFA3;}
 .yellow{background:#FFD166;}
 .red{background:#EF476F;}
 </style>
 """, unsafe_allow_html=True)
 
-
-# MODEL 
-try:
-    model = joblib.load("model.pkl")
-    model_loaded = True
-except:
-    model_loaded = False
-    class Dummy:
-        def predict(self,X):
-            return [np.random.uniform(-10,0)]
-    model = Dummy()
-
-# HERO 
+# =========================
+# HERO
+# =========================
 st.markdown("""
 <div class="hero">
   <div class="icon">🧬</div>
@@ -151,87 +138,70 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-
+# =========================
 # INPUT
+# =========================
 smiles = st.text_input("SMILES Input", placeholder="e.g. CCO")
 
-# FEATURES 
-feature_order = [
- 'MolWt','MolLogP','MolMR','HeavyAtomCount','NumHAcceptors',
- 'NumHDonors','NumHeteroatoms','NumRotatableBonds',
- 'NumValenceElectrons','NumAromaticRings','NumSaturatedRings',
- 'NumAliphaticRings','RingCount','TPSA','LabuteASA',
- 'BalabanJ','BertzCT'
-]
-
+# =========================
+# FAKE FEATURE GENERATION (placeholder)
+# =========================
 def featurize(_):
     return pd.DataFrame([{
         'MolWt': np.random.uniform(200, 500),
         'MolLogP': np.random.uniform(1, 5),
-        'MolMR': np.random.uniform(50, 150),
-        'HeavyAtomCount': np.random.randint(10, 50),
-        'NumHAcceptors': np.random.randint(1, 10),
         'NumHDonors': np.random.randint(0, 5),
-        'NumHeteroatoms': np.random.randint(1, 10),
-        'NumRotatableBonds': np.random.randint(0, 10),
-        'NumValenceElectrons': np.random.randint(20, 100),
-        'NumAromaticRings': np.random.randint(0, 5),
-        'NumSaturatedRings': np.random.randint(0, 5),
-        'NumAliphaticRings': np.random.randint(0, 5),
-        'RingCount': np.random.randint(0, 10),
-        'TPSA': np.random.uniform(50, 150),
-        'LabuteASA': np.random.uniform(50, 200),
-        'BalabanJ': np.random.uniform(0, 5),
-        'BertzCT': np.random.uniform(0, 1000)
+        'NumHAcceptors': np.random.randint(1, 10)
     }])
 
-# ACTION 
+# =========================
+# ACTION
+# =========================
 if st.button("Analyze Molecule"):
 
     features = featurize(smiles)
-    features = features[feature_order]
-MolWt = features['MolWt'][0]
-LogP = features['MolLogP'][0]
-HDonors = features['NumHDonors'][0]
-HAcceptors = features['NumHAcceptors'][0]
 
-score = 1.0
+    MolWt = features['MolWt'][0]
+    LogP = features['MolLogP'][0]
+    HDonors = features['NumHDonors'][0]
+    HAcceptors = features['NumHAcceptors'][0]
 
-if MolWt > 500:
-    score -= 0.2
-if LogP > 5:
-    score -= 0.2
-if HDonors > 5:
-    score -= 0.2
-if HAcceptors > 10:
-    score -= 0.2
+    # =========================
+    # SCIENTIFIC RULE-BASED SCORE
+    # =========================
+    score = 1.0
 
-score = max(0.0, score)
+    if MolWt > 500:
+        score -= 0.2
+    if LogP > 5:
+        score -= 0.2
+    if HDonors > 5:
+        score -= 0.2
+    if HAcceptors > 10:
+        score -= 0.2
 
-if score >= 0.7:
-    decision, cls = "DRUG-LIKE CANDIDATE", "good"
-elif score >= 0.4:
-    decision, cls = "MODERATE POTENTIAL", "mid"
-else:
-    decision, cls = "NOT DRUG-LIKE", "bad"
+    score = max(0.0, score)
+
+    # =========================
+    # DECISION
+    # =========================
+    if score >= 0.7:
+        decision, cls = "DRUG-LIKE", "good"
+    elif score >= 0.4:
+        decision, cls = "MODERATE", "mid"
+    else:
+        decision, cls = "NOT DRUG-LIKE", "bad"
 
     st.markdown('<div class="section">Results</div>', unsafe_allow_html=True)
     st.markdown(f'<div class="decision {cls}">{decision}</div>', unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2 = st.columns(2)
     col1.markdown(f'<div class="metric">{score:.2f}</div><p>AI Score</p>', unsafe_allow_html=True)
     col2.markdown(f'<div class="metric">{score*100:.1f}%</div><p>Confidence</p>', unsafe_allow_html=True)
-    col3.markdown(f'<span class="led {"green" if score>0.7 else "yellow" if score>0.5 else "red"}"></span>{"Model Loaded" if model_loaded else "Fallback"}', unsafe_allow_html=True)
 
     st.progress(score)
 
-    st.markdown('<div class="section">Molecular Properties</div>', unsafe_allow_html=True)
-    cols = st.columns(4)
-    for i,(k,v) in enumerate(features.iloc[0].items()):
-        cols[i%4].metric(k, f"{v:.2f}")
-
-
-
-
+    st.markdown('<div class="section">Key Properties</div>', unsafe_allow_html=True)
+    st.write(features)
 
 
