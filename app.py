@@ -1,190 +1,143 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import joblib
 
 st.set_page_config(page_title="LigandLogic", layout="wide")
 
 # =========================
-# 🎨 STYLE (UNCHANGED UI)
+# 🎨 CUSTOM UI STYLE
 # =========================
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@500&family=Poppins:wght@900&display=swap');
-
-.stApp{
-  background: radial-gradient(circle at 50% 10%, #0F172A, #0B0E14);
-  color:#E6EDF3;
+.stApp {
+    background: #002e5d;
+    color: white;
 }
 
-.hero{
-  text-align:center;
-  margin-top:35px;
+/* TITLE */
+.title {
+    text-align: center;
+    font-size: 48px;
+    font-weight: 800;
+    background: linear-gradient(90deg,#ff4e50,#f9d423);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-.icon{
-  font-size:65px;
-  margin-bottom:8px;
-  filter: drop-shadow(0 0 12px #00D1FF);
+/* TAGLINE */
+.tagline {
+    text-align: center;
+    font-size: 16px;
+    font-style: italic;
+    color: #fbd786;
+    margin-bottom: 20px;
 }
 
-.title{
-  font-family: 'Poppins', sans-serif;
-  font-size:48px;
-  font-weight:800;
-  letter-spacing:-1px;
-  background: linear-gradient(90deg,#00D1FF,#6366F1);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
+/* SECTION HEAD */
+.section {
+    font-size: 22px;
+    margin-top: 30px;
+    font-weight: 600;
 }
 
-.tagline{
-  font-family: 'Poppins', sans-serif;
-  font-weight:900;
-  font-size:15px;
-  color:#94A3B8;
-  margin-top:6px;
-  font-style: italic;
-  text-transform: lowercase;
+/* INPUT BOXES */
+.stNumberInput input {
+    background: linear-gradient(90deg,#554023,#c99846);
+    color: white !important;
+    border-radius: 10px;
 }
 
-.tags{
-  margin-top:15px;
+/* BUTTON */
+.stButton>button {
+    background: linear-gradient(90deg,#ff512f,#dd2476);
+    color: white;
+    border-radius: 12px;
+    height: 3em;
+    font-weight: bold;
 }
 
-.tag{
-  display:inline-block;
-  padding:8px 16px;
-  margin:6px;
-  border-radius:50px;
-  font-size:13px;
-  font-family: 'Ubuntu', sans-serif;
-  font-weight:500;
-  color:white;
+/* RESULT BOX */
+.result {
+    text-align: center;
+    font-size: 26px;
+    font-weight: 700;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 15px;
 }
 
-.tag1{background: linear-gradient(90deg,#6366F1,#00D1FF);}
-.tag2{background: linear-gradient(90deg,#00FFA3,#00D1FF);}
-.tag3{background: linear-gradient(90deg,#8B5CF6,#EC4899);}
+.good { background: linear-gradient(90deg,#fbd786,#f7797d); color: black; }
+.mid { background: linear-gradient(90deg,#fbd3e9,#bb377d); color: white; }
+.bad { background: linear-gradient(90deg,#ff512f,#dd2476); color: white; }
 
-.section{
-  margin-top:28px;
-  font-size:24px;
-  font-weight:600;
-  color:#00D1FF;
+/* METRIC */
+.metric {
+    font-size: 28px;
+    font-weight: 600;
 }
-
-input{
-  font-family: monospace !important;
-  background:transparent !important;
-  color:#E6EDF3 !important;
-  border:1px solid #30363D !important;
-  border-radius:12px !important;
-}
-
-.stButton>button{
-  background: linear-gradient(90deg,#6366F1,#00D1FF);
-  border-radius:14px;
-  height:3em;
-  font-weight:600;
-}
-
-.metric{
-  font-size:32px;
-  font-weight:600;
-  background: linear-gradient(90deg,#00D1FF,#6366F1);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-}
-
-.decision{
-  text-align:center;
-  font-size:24px;
-  font-weight:700;
-  padding:18px;
-  border-radius:14px;
-  margin-top:10px;
-}
-
-.good{background:rgba(0,255,163,0.1); color:#00FFA3;}
-.mid{background:rgba(255,209,102,0.1); color:#FFD166;}
-.bad{background:rgba(239,71,111,0.1); color:#EF476F;}
-
-.led{
-  height:10px;width:10px;border-radius:50%;
-  display:inline-block;margin-right:6px;
-}
-
-.green{background:#00FFA3;}
-.yellow{background:#FFD166;}
-.red{background:#EF476F;}
 </style>
 """, unsafe_allow_html=True)
 
 # =========================
-# HERO
+# HEADER
 # =========================
-st.markdown("""
-<div class="hero">
-  <div class="icon">🧬</div>
-  <div class="title">LigandLogic</div>
-  <div class="tagline">where machine learning meets molecular intelligence</div>
-
-  <div class="tags">
-    <span class="tag tag1">AI/ML</span>
-    <span class="tag tag2">Drug Discovery</span>
-    <span class="tag tag3">Molecular Intelligence</span>
-  </div>
-</div>
-""", unsafe_allow_html=True)
+st.markdown('<div class="title">LigandLogic</div>', unsafe_allow_html=True)
+st.markdown('<div class="tagline">where machine learning meets molecular intelligence</div>', unsafe_allow_html=True)
 
 # =========================
-# INPUT
+# LOAD MODEL
 # =========================
-smiles = st.text_input("SMILES Input", placeholder="e.g. CCO")
+model = joblib.load("model.pkl")
 
 # =========================
-# FAKE FEATURE GENERATION (placeholder)
+# INPUT SECTION
 # =========================
-def featurize(_):
-    return pd.DataFrame([{
-        'MolWt': np.random.uniform(200, 500),
-        'MolLogP': np.random.uniform(1, 5),
-        'NumHDonors': np.random.randint(0, 5),
-        'NumHAcceptors': np.random.randint(1, 10)
-    }])
+st.markdown('<div class="section">Enter Molecular Properties</div>', unsafe_allow_html=True)
+
+col1, col2 = st.columns(2)
+
+with col1:
+    MolWt = st.number_input("Molecular Weight", 0.0, 1000.0, 180.0)
+    MolLogP = st.number_input("LogP", 0.0, 10.0, 2.0)
+    TPSA = st.number_input("TPSA", 0.0, 200.0, 80.0)
+
+with col2:
+    NumHDonors = st.number_input("H Donors", 0, 10, 1)
+    NumHAcceptors = st.number_input("H Acceptors", 0, 15, 3)
+    HeavyAtomCount = st.number_input("Heavy Atom Count", 0, 100, 20)
 
 # =========================
-# ACTION
+# PREDICTION
 # =========================
 if st.button("Analyze Molecule"):
 
-    features = featurize(smiles)
+    # MATCH MODEL FEATURES
+    features = pd.DataFrame([{
+        'MolWt': MolWt,
+        'MolLogP': MolLogP,
+        'MolMR': 0,
+        'HeavyAtomCount': HeavyAtomCount,
+        'NumHAcceptors': NumHAcceptors,
+        'NumHDonors': NumHDonors,
+        'NumHeteroatoms': 0,
+        'NumRotatableBonds': 0,
+        'NumValenceElectrons': 0,
+        'NumAromaticRings': 0,
+        'NumSaturatedRings': 0,
+        'NumAliphaticRings': 0,
+        'RingCount': 0,
+        'TPSA': TPSA,
+        'LabuteASA': 0,
+        'BalabanJ': 0,
+        'BertzCT': 0
+    }])
 
-    MolWt = features['MolWt'][0]
-    LogP = features['MolLogP'][0]
-    HDonors = features['NumHDonors'][0]
-    HAcceptors = features['NumHAcceptors'][0]
+    pred = model.predict(features)[0]
 
-    # =========================
-    # SCIENTIFIC RULE-BASED SCORE
-    # =========================
-    score = 1.0
+    score = float((pred + 10) / 10)
+    score = max(0, min(score, 1))
 
-    if MolWt > 500:
-        score -= 0.2
-    if LogP > 5:
-        score -= 0.2
-    if HDonors > 5:
-        score -= 0.2
-    if HAcceptors > 10:
-        score -= 0.2
-
-    score = max(0.0, score)
-
-    # =========================
     # DECISION
-    # =========================
     if score >= 0.7:
         decision, cls = "DRUG-LIKE", "good"
     elif score >= 0.4:
@@ -192,16 +145,13 @@ if st.button("Analyze Molecule"):
     else:
         decision, cls = "NOT DRUG-LIKE", "bad"
 
-    st.markdown('<div class="section">Results</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="decision {cls}">{decision}</div>', unsafe_allow_html=True)
+    # =========================
+    # OUTPUT
+    # =========================
+    st.markdown(f'<div class="result {cls}">{decision}</div>', unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
     col1.markdown(f'<div class="metric">{score:.2f}</div><p>AI Score</p>', unsafe_allow_html=True)
     col2.markdown(f'<div class="metric">{score*100:.1f}%</div><p>Confidence</p>', unsafe_allow_html=True)
 
     st.progress(score)
-
-    st.markdown('<div class="section">Key Properties</div>', unsafe_allow_html=True)
-    st.write(features)
-
-
