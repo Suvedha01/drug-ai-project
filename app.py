@@ -6,12 +6,13 @@ import joblib
 st.set_page_config(page_title="LigandLogic", layout="wide")
 
 # =========================
-# 🎨 HEADER REFINEMENT ONLY
+# 🎨 STYLE (FINAL FIXED)
 # =========================
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@700&family=Inter:wght@200&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@500&family=Poppins:wght@900&display=swap');
 
+/* NOTE: MilkyRain is not on Google Fonts, fallback used */
 .stApp{
   background: radial-gradient(circle at 50% 10%, #0F172A, #0B0E14);
   color:#E6EDF3;
@@ -20,60 +21,57 @@ st.markdown("""
 /* HERO */
 .hero{
   text-align:center;
-  margin-top:40px;
+  margin-top:35px;
 }
 
-/* ICON (Balanced) */
+/* ICON */
 .icon{
-  font-size:70px;  /* ~60% of title */
+  font-size:65px;
   margin-bottom:8px;
-  filter: drop-shadow(0 0 15px #00D1FF);
+  filter: drop-shadow(0 0 12px #00D1FF);
 }
 
-/* TITLE (Refined, not loud) */
+/* TITLE */
 .title{
-  font-family: 'Instrument Sans', sans-serif;
+  font-family: 'MilkyRain', 'Poppins', sans-serif;
   font-size:48px;
-  font-weight:700;
+  font-weight:800;
   letter-spacing:-1px;
-  background: linear-gradient(90deg,#FFFFFF,#94A3B8);
+  background: linear-gradient(90deg,#00D1FF,#6366F1);
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
 }
 
-/* TAGLINE (Professional, subtle) */
+/* TAGLINE */
 .tagline{
-  font-family: 'Inter', sans-serif;
-  font-weight:200;
-  font-size:14px;
-  letter-spacing:1px;
-  text-transform: uppercase;
-  color:#64748B;
+  font-family: 'Poppins', sans-serif;
+  font-weight:900;
+  font-size:15px;
+  color:#94A3B8;
   margin-top:6px;
 }
 
-/* KEEP REST SAME */
-.badges{
-  margin-top:12px;
+/* TAGS */
+.tags{
+  margin-top:15px;
 }
-.badge{
+.tag{
   display:inline-block;
-  padding:6px 14px;
-  border-radius:20px;
-  border:1px solid #30363D;
+  padding:8px 16px;
   margin:6px;
+  border-radius:50px;
   font-size:13px;
-  color:#CBD5E1;
-  background: rgba(255,255,255,0.03);
+  font-family: 'Ubuntu', sans-serif;
+  font-weight:500;
+  color:white;
 }
 
-.divider{
-  height:1px;
-  margin:22px auto;
-  width:60%;
-  background: linear-gradient(90deg, transparent, #00D1FF, transparent);
-}
+/* COLOR TAGS (like button) */
+.tag1{background: linear-gradient(90deg,#6366F1,#00D1FF);}
+.tag2{background: linear-gradient(90deg,#00D1FF,#00FFA3);}
+.tag3{background: linear-gradient(90deg,#8B5CF6,#6366F1);}
 
+/* SECTION */
 .section{
   margin-top:28px;
   font-size:24px;
@@ -81,6 +79,7 @@ st.markdown("""
   color:#00D1FF;
 }
 
+/* INPUT */
 input{
   font-family: monospace !important;
   background:transparent !important;
@@ -89,6 +88,7 @@ input{
   border-radius:12px !important;
 }
 
+/* BUTTON */
 .stButton>button{
   background: linear-gradient(90deg,#6366F1,#00D1FF);
   border-radius:14px;
@@ -96,6 +96,7 @@ input{
   font-weight:600;
 }
 
+/* METRIC */
 .metric{
   font-size:32px;
   font-weight:600;
@@ -104,6 +105,7 @@ input{
   -webkit-text-fill-color:transparent;
 }
 
+/* DECISION */
 .decision{
   text-align:center;
   font-size:24px;
@@ -116,6 +118,7 @@ input{
 .mid{background:rgba(255,209,102,0.1); color:#FFD166;}
 .bad{background:rgba(239,71,111,0.1); color:#EF476F;}
 
+/* LED */
 .led{
   height:10px;width:10px;border-radius:50%;
   display:inline-block;margin-right:6px;
@@ -140,7 +143,7 @@ except:
     model = Dummy()
 
 # =========================
-# HERO (ONLY VISUAL FIXED)
+# HERO (FIXED)
 # =========================
 st.markdown("""
 <div class="hero">
@@ -148,22 +151,22 @@ st.markdown("""
   <div class="title">LigandLogic</div>
   <div class="tagline">WHERE MACHINE LEARNING MEETS MOLECULAR INTELLIGENCE</div>
 
-  <div class="badges">
-    <span class="badge">🤖 AI/ML</span>
-    <span class="badge">🧪 Drug Discovery</span>
-    <span class="badge">🧬 Molecular Intelligence</span>
+  <div class="tags">
+    <span class="tag tag1">AI/ML</span>
+    <span class="tag tag2">DRUG DISCOVERY</span>
+    <span class="tag tag3">MOLECULAR INTELLIGENCE</span>
   </div>
-
-  <div class="divider"></div>
 </div>
 """, unsafe_allow_html=True)
 
 # =========================
-# EVERYTHING BELOW SAME
+# INPUT
 # =========================
-
 smiles = st.text_input("SMILES Input", placeholder="e.g. CCO")
 
+# =========================
+# FEATURES (UNCHANGED)
+# =========================
 feature_order = [
  'MolWt','MolLogP','MolMR','HeavyAtomCount','NumHAcceptors',
  'NumHDonors','NumHeteroatoms','NumRotatableBonds',
@@ -193,6 +196,9 @@ def featurize(_):
         'BertzCT': np.random.uniform(0, 1000)
     }])
 
+# =========================
+# ACTION (UNCHANGED)
+# =========================
 if st.button("Analyze Molecule"):
 
     features = featurize(smiles)
@@ -218,3 +224,12 @@ if st.button("Analyze Molecule"):
     col3.markdown(f'<span class="led {"green" if score>0.7 else "yellow" if score>0.5 else "red"}"></span>{"Model Loaded" if model_loaded else "Fallback"}', unsafe_allow_html=True)
 
     st.progress(score)
+
+    st.markdown('<div class="section">Molecular Properties</div>', unsafe_allow_html=True)
+    cols = st.columns(4)
+    for i,(k,v) in enumerate(features.iloc[0].items()):
+        cols[i%4].metric(k, f"{v:.2f}")
+
+
+
+
