@@ -5,9 +5,6 @@ import joblib
 
 st.set_page_config(page_title="LigandLogic", layout="wide")
 
-# =========================
-# 🎨 STYLE (FINAL POLISH ONLY)
-# =========================
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@500&family=Poppins:wght@900&display=swap');
@@ -127,9 +124,8 @@ input{
 </style>
 """, unsafe_allow_html=True)
 
-# =========================
-# MODEL (UNCHANGED)
-# =========================
+
+# MODEL 
 try:
     model = joblib.load("model.pkl")
     model_loaded = True
@@ -140,9 +136,7 @@ except:
             return [np.random.uniform(-10,0)]
     model = Dummy()
 
-# =========================
-# HERO (UPDATED)
-# =========================
+# HERO 
 st.markdown("""
 <div class="hero">
   <div class="icon">🧬</div>
@@ -157,14 +151,11 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# =========================
+
 # INPUT
-# =========================
 smiles = st.text_input("SMILES Input", placeholder="e.g. CCO")
 
-# =========================
-# FEATURES (UNCHANGED)
-# =========================
+# FEATURES 
 feature_order = [
  'MolWt','MolLogP','MolMR','HeavyAtomCount','NumHAcceptors',
  'NumHDonors','NumHeteroatoms','NumRotatableBonds',
@@ -194,24 +185,35 @@ def featurize(_):
         'BertzCT': np.random.uniform(0, 1000)
     }])
 
-# =========================
-# ACTION (UNCHANGED)
-# =========================
+# ACTION 
 if st.button("Analyze Molecule"):
 
     features = featurize(smiles)
     features = features[feature_order]
-    pred = model.predict(features)[0]
+MolWt = features['MolWt'][0]
+LogP = features['MolLogP'][0]
+HDonors = features['NumHDonors'][0]
+HAcceptors = features['NumHAcceptors'][0]
 
-    score = float((pred + 10) / 10)
-    score = max(0.0, min(score, 1.0))
+score = 1.0
 
-    if score >= 0.75:
-        decision, cls = "DRUG-LIKE CANDIDATE", "good"
-    elif score >= 0.5:
-        decision, cls = "MODERATE POTENTIAL", "mid"
-    else:
-        decision, cls = "NOT DRUG-LIKE", "bad"
+if MolWt > 500:
+    score -= 0.2
+if LogP > 5:
+    score -= 0.2
+if HDonors > 5:
+    score -= 0.2
+if HAcceptors > 10:
+    score -= 0.2
+
+score = max(0.0, score)
+
+if score >= 0.7:
+    decision, cls = "DRUG-LIKE CANDIDATE", "good"
+elif score >= 0.4:
+    decision, cls = "MODERATE POTENTIAL", "mid"
+else:
+    decision, cls = "NOT DRUG-LIKE", "bad"
 
     st.markdown('<div class="section">Results</div>', unsafe_allow_html=True)
     st.markdown(f'<div class="decision {cls}">{decision}</div>', unsafe_allow_html=True)
