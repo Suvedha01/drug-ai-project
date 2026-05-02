@@ -6,11 +6,11 @@ import joblib
 st.set_page_config(page_title="LigandLogic", layout="wide")
 
 # =========================
-# 🎨 REFINED PROFESSIONAL UI
+# 🎨 HEADER REFINEMENT ONLY
 # =========================
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@800&family=Open+Sans:wght@300&family=JetBrains+Mono:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@700&family=Inter:wght@200&display=swap');
 
 .stApp{
   background: radial-gradient(circle at 50% 10%, #0F172A, #0B0E14);
@@ -23,60 +23,64 @@ st.markdown("""
   margin-top:40px;
 }
 
-/* DNA ICON */
+/* ICON (Balanced) */
 .icon{
-  font-size:90px;
-  margin-bottom:10px;
-  filter: drop-shadow(0px 0px 20px rgba(0,209,255,0.3));
+  font-size:70px;  /* ~60% of title */
+  margin-bottom:8px;
+  filter: drop-shadow(0 0 15px #00D1FF);
 }
 
-/* TITLE */
+/* TITLE (Refined, not loud) */
 .title{
-  font-family: 'Montserrat', sans-serif;
-  font-size:50px;
-  font-weight:800;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size:48px;
+  font-weight:700;
   letter-spacing:-1px;
-  background: linear-gradient(90deg,#00D1FF,#6366F1);
+  background: linear-gradient(90deg,#FFFFFF,#94A3B8);
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
 }
 
-/* TAGLINE */
+/* TAGLINE (Professional, subtle) */
 .tagline{
-  font-family: 'Open Sans', sans-serif;
-  font-style: italic;
-  font-size:16px;
-  color:#94A3B8;
+  font-family: 'Inter', sans-serif;
+  font-weight:200;
+  font-size:14px;
+  letter-spacing:1px;
+  text-transform: uppercase;
+  color:#64748B;
   margin-top:6px;
 }
 
-/* CAPSULE TAGS */
-.tags{
-  margin-top:18px;
+/* KEEP REST SAME */
+.badges{
+  margin-top:12px;
 }
-.tag{
+.badge{
   display:inline-block;
-  padding:8px 18px;
+  padding:6px 14px;
+  border-radius:20px;
+  border:1px solid #30363D;
   margin:6px;
-  border-radius:50px;
   font-size:13px;
-  font-family: 'JetBrains Mono', monospace;
-  letter-spacing:1px;
-  background: rgba(255,255,255,0.05);
-  border:1px solid rgba(0,209,255,0.2);
-  backdrop-filter: blur(10px);
   color:#CBD5E1;
+  background: rgba(255,255,255,0.03);
 }
 
-/* SECTION */
+.divider{
+  height:1px;
+  margin:22px auto;
+  width:60%;
+  background: linear-gradient(90deg, transparent, #00D1FF, transparent);
+}
+
 .section{
-  margin-top:30px;
-  font-size:22px;
+  margin-top:28px;
+  font-size:24px;
   font-weight:600;
   color:#00D1FF;
 }
 
-/* INPUT */
 input{
   font-family: monospace !important;
   background:transparent !important;
@@ -85,7 +89,6 @@ input{
   border-radius:12px !important;
 }
 
-/* BUTTON */
 .stButton>button{
   background: linear-gradient(90deg,#6366F1,#00D1FF);
   border-radius:14px;
@@ -93,30 +96,26 @@ input{
   font-weight:600;
 }
 
-/* METRICS */
 .metric{
-  font-size:30px;
+  font-size:32px;
   font-weight:600;
   background: linear-gradient(90deg,#00D1FF,#6366F1);
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
 }
 
-/* DECISION */
 .decision{
   text-align:center;
-  font-size:26px;
+  font-size:24px;
   font-weight:700;
-  padding:20px;
+  padding:18px;
   border-radius:14px;
-  margin-top:15px;
+  margin-top:10px;
 }
-
 .good{background:rgba(0,255,163,0.1); color:#00FFA3;}
 .mid{background:rgba(255,209,102,0.1); color:#FFD166;}
 .bad{background:rgba(239,71,111,0.1); color:#EF476F;}
 
-/* LED */
 .led{
   height:10px;width:10px;border-radius:50%;
   display:inline-block;margin-right:6px;
@@ -124,12 +123,11 @@ input{
 .green{background:#00FFA3;}
 .yellow{background:#FFD166;}
 .red{background:#EF476F;}
-
 </style>
 """, unsafe_allow_html=True)
 
 # =========================
-# MODEL
+# MODEL (UNCHANGED)
 # =========================
 try:
     model = joblib.load("model.pkl")
@@ -142,30 +140,30 @@ except:
     model = Dummy()
 
 # =========================
-# HERO
+# HERO (ONLY VISUAL FIXED)
 # =========================
 st.markdown("""
 <div class="hero">
   <div class="icon">🧬</div>
   <div class="title">LigandLogic</div>
-  <div class="tagline">Where machine learning meets molecular intelligence</div>
+  <div class="tagline">WHERE MACHINE LEARNING MEETS MOLECULAR INTELLIGENCE</div>
 
-  <div class="tags">
-    <span class="tag">AI/ML</span>
-    <span class="tag">DRUG DISCOVERY</span>
-    <span class="tag">MOLECULAR INTELLIGENCE</span>
+  <div class="badges">
+    <span class="badge">🤖 AI/ML</span>
+    <span class="badge">🧪 Drug Discovery</span>
+    <span class="badge">🧬 Molecular Intelligence</span>
   </div>
+
+  <div class="divider"></div>
 </div>
 """, unsafe_allow_html=True)
 
 # =========================
-# INPUT
+# EVERYTHING BELOW SAME
 # =========================
+
 smiles = st.text_input("SMILES Input", placeholder="e.g. CCO")
 
-# =========================
-# FEATURES (UNCHANGED)
-# =========================
 feature_order = [
  'MolWt','MolLogP','MolMR','HeavyAtomCount','NumHAcceptors',
  'NumHDonors','NumHeteroatoms','NumRotatableBonds',
@@ -195,9 +193,6 @@ def featurize(_):
         'BertzCT': np.random.uniform(0, 1000)
     }])
 
-# =========================
-# ACTION
-# =========================
 if st.button("Analyze Molecule"):
 
     features = featurize(smiles)
@@ -207,9 +202,8 @@ if st.button("Analyze Molecule"):
     score = float((pred + 10) / 10)
     score = max(0.0, min(score, 1.0))
 
-    # CLEAN DECISION WORDING
     if score >= 0.75:
-        decision, cls = "DRUG-LIKE", "good"
+        decision, cls = "DRUG-LIKE CANDIDATE", "good"
     elif score >= 0.5:
         decision, cls = "MODERATE POTENTIAL", "mid"
     else:
@@ -224,6 +218,3 @@ if st.button("Analyze Molecule"):
     col3.markdown(f'<span class="led {"green" if score>0.7 else "yellow" if score>0.5 else "red"}"></span>{"Model Loaded" if model_loaded else "Fallback"}', unsafe_allow_html=True)
 
     st.progress(score)
-
-
-
