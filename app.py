@@ -2,92 +2,69 @@ import streamlit as st
 import joblib
 import pandas as pd
 import numpy as np
+import plotly.graph_objects as go
 
 st.set_page_config(page_title="LigandLogic", layout="wide")
 
+
+# PREMIUM UI
 st.markdown("""
 <style>
 
-/* Background */
 .stApp {
-    background-color: #0B0E14;
+    background: radial-gradient(circle at top, #0B0E14, #05070A);
     color: #E6EDF3;
 }
 
 /* Title */
 .title {
-    font-size: 52px;
+    font-size: 46px;
     font-weight: 700;
+    text-align: center;
     letter-spacing: 1px;
-    text-align: center;
-    color: white;
-    text-shadow: 0px 0px 15px rgba(0, 209, 255, 0.3);
 }
 
-/* Subtitle */
-.subtitle {
-    text-align: center;
-    color: #8B949E;
-    margin-bottom: 30px;
+/* Command bar */
+.command {
+    border: 1px solid #00D1FF;
+    border-radius: 10px;
+    padding: 10px;
 }
 
-/* Cards */
+/* Glass card */
 .card {
-    background-color: #161B22;
-    border: 1px solid #30363D;
-    border-radius: 12px;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(12px);
+    border: 1px solid #ffffff22;
+    border-radius: 14px;
     padding: 20px;
 }
 
-/* SMILES input */
-textarea, input {
-    background-color: #0B0E14 !important;
-    color: #E6EDF3 !important;
-    border: 1px solid #30363D !important;
+/* Input */
+input {
     font-family: monospace !important;
-    border-radius: 8px !important;
+    color: white !important;
+    background: transparent !important;
 }
 
 /* Button */
 .stButton>button {
-    background-color: #00D1FF;
-    color: black;
-    font-weight: 600;
+    background: linear-gradient(90deg,#0a84ff,#00d1ff);
+    color: white;
     border-radius: 10px;
     height: 3em;
-    width: 100%;
 }
 .stButton>button:hover {
-    box-shadow: 0px 0px 15px rgba(0, 209, 255, 0.6);
-}
-
-/* Sample chips */
-.chip {
-    display: inline-block;
-    padding: 8px 12px;
-    margin: 5px;
-    border-radius: 8px;
-    background-color: #21262D;
-    border: 1px solid #30363D;
-    cursor: pointer;
-}
-.chip:hover {
-    background-color: #30363D;
-}
-
-/* Stats */
-.stat {
-    font-size: 20px;
-    font-weight: 600;
-    color: #00FFA3;
+    box-shadow: 0px 0px 20px rgba(0,209,255,0.7);
 }
 
 </style>
 """, unsafe_allow_html=True)
 
+
 # HEADER
 st.markdown('<div class="title">LigandLogic</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">AI-driven molecular prioritization for computational drug discovery</div>', unsafe_allow_html=True)
+st.caption("Where machine learning meets molecular intelligence")
 
 
 # LOAD MODEL
@@ -102,43 +79,14 @@ feature_order = [
 ]
 
 
-# LAYOUT
-col_main, col_side = st.columns([3, 1.5])
+# COMMAND BAR (TOP INPUT)
+st.markdown('<div class="card">', unsafe_allow_html=True)
+smiles = st.text_input("Enter SMILES", placeholder="e.g. CCO")
+st.markdown('</div>', unsafe_allow_html=True)
 
 
-# LEFT PANEL
-with col_main:
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-
-    smiles = st.text_input("SMILES Input", placeholder="Enter molecule (e.g. CCO)")
-
-    st.markdown("**Sample Molecules:**")
-
-    # clickable chips (simulated)
-    sample_list = ["CCO", "CCC", "CCN", "C1=CC=CC=C1"]
-
-    selected_sample = None
-    cols = st.columns(len(sample_list))
-    for i, s in enumerate(sample_list):
-        if cols[i].button(s):
-            selected_sample = s
-
-    if selected_sample:
-        smiles = selected_sample
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
-
-# RIGHT PANEL
-with col_side:
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-
-    st.markdown("### Prediction Stats")
-
-    score_placeholder = st.empty()
-    rank_placeholder = st.empty()
-
-    st.markdown('</div>', unsafe_allow_html=True)
+# LAYOUT GRID
+left, center, right = st.columns([1,2,1])
 
 
 # FEATURE GENERATION
@@ -164,20 +112,72 @@ def featurize(smiles):
     }])
 
 
-# ACTION BUTTON
+# ACTION
 if st.button("Analyze"):
 
     features = featurize(smiles)
     features = features[feature_order]
-
     pred = model.predict(features)[0]
 
-    # Update stats panel
-    score_placeholder.markdown(f'<div class="stat">Score: {pred:.3f}</div>', unsafe_allow_html=True)
-    rank_placeholder.markdown(f'<div class="stat">Rank Confidence: {pred*100:.1f}%</div>', unsafe_allow_html=True)
+    # normalize
+    score = (pred + 10) / 10
+    score = max(0, min(score, 1))
 
-    st.progress(min(max(pred, 0), 1))
+   
+    # LEFT PANEL (PROPERTIES)
+    with left:
+        st.markdown('<div class="card">', unsafe_allow_html=True)
+        st.markdown("### Properties")
 
-# FOOTER
-st.markdown("---")
-st.markdown("LigandLogic • Computational Drug Discovery Interface")
+        st.metric("MolWt", f"{features['MolWt'][0]:.1f}")
+        st.metric("LogP", f"{features['MolLogP'][0]:.2f}")
+        st.metric("TPSA", f"{features['TPSA'][0]:.1f}")
+
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    
+    # CENTER PANEL (MAIN)
+    with center:
+        st.markdown('<div class="card">', unsafe_allow_html=True)
+        st.markdown(f"## Score: {score:.2f}")
+        st.progress(score)
+
+        # Radar chart
+        fig = go.Figure()
+
+        fig.add_trace(go.Scatterpolar(
+            r=[
+                features['MolWt'][0]/500,
+                features['MolLogP'][0]/5,
+                features['TPSA'][0]/150,
+                score,
+                np.random.uniform(0.4,1)
+            ],
+            theta=["MolWt","LogP","TPSA","AI Score","Drug-likeness"],
+            fill='toself'
+        ))
+
+        fig.update_layout(
+            polar=dict(bgcolor="#0B0E14"),
+            paper_bgcolor="#0B0E14",
+            font_color="white"
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+
+    # RIGHT PANEL (AI OUTPUT)
+    with right:
+        st.markdown('<div class="card">', unsafe_allow_html=True)
+        st.markdown("### AI Analysis")
+
+        if score > 0.7:
+            st.success("High potential candidate")
+        elif score > 0.5:
+            st.info("Moderate candidate")
+        else:
+            st.warning("Low potential")
+
+        st.markdown('</div>', unsafe_allow_html=True)
+
