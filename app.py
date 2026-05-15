@@ -2,215 +2,360 @@ import streamlit as st
 import requests
 import pandas as pd
 
-# =====================================================
+# =========================================================
 # PAGE CONFIG
-# =====================================================
+# =========================================================
 st.set_page_config(
     page_title="BioBound",
-    page_icon="🧬",
+    page_icon="⚗️",
     layout="centered"
 )
 
-# =====================================================
-# CSS STYLING
-# =====================================================
+# =========================================================
+# PREMIUM BIOTECH UI
+# =========================================================
 st.markdown("""
 <style>
 
-/* Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+/* Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
 /* Main Background */
 .stApp {
+
     background:
         radial-gradient(circle at top left, rgba(0,171,228,0.10), transparent 25%),
         radial-gradient(circle at bottom right, rgba(197,173,197,0.18), transparent 30%),
-        linear-gradient(135deg, #E9F1FA 0%, #F8FBFF 45%, #FFFFFF 100%);
+        linear-gradient(
+            135deg,
+            #E9F1FA 0%,
+            #F8FBFF 45%,
+            #FFFFFF 100%
+        );
 
-    font-family: 'Inter', sans-serif;
+    font-family: 'Poppins', sans-serif;
+
     color: #1E293B;
+
+    overflow-x:hidden;
 }
 
-/* Floating Glow */
+/* Floating Glows */
 .stApp::before {
-    content: '';
-    position: fixed;
-    width: 420px;
-    height: 420px;
-    background: rgba(0,171,228,0.12);
-    border-radius: 50%;
-    filter: blur(120px);
-    top: -100px;
-    left: -100px;
-    animation: float1 10s ease-in-out infinite alternate;
-    z-index: -1;
+
+    content:'';
+
+    position:fixed;
+
+    width:420px;
+    height:420px;
+
+    background:rgba(0,171,228,0.12);
+
+    border-radius:50%;
+
+    filter:blur(120px);
+
+    top:-100px;
+    left:-100px;
+
+    animation:float1 10s ease-in-out infinite alternate;
+
+    z-index:-1;
 }
 
 .stApp::after {
-    content: '';
-    position: fixed;
-    width: 420px;
-    height: 420px;
-    background: rgba(197,173,197,0.20);
-    border-radius: 50%;
-    filter: blur(120px);
-    bottom: -100px;
-    right: -100px;
-    animation: float2 12s ease-in-out infinite alternate;
-    z-index: -1;
+
+    content:'';
+
+    position:fixed;
+
+    width:420px;
+    height:420px;
+
+    background:rgba(197,173,197,0.20);
+
+    border-radius:50%;
+
+    filter:blur(120px);
+
+    bottom:-100px;
+    right:-100px;
+
+    animation:float2 12s ease-in-out infinite alternate;
+
+    z-index:-1;
 }
 
+/* Floating Animations */
 @keyframes float1 {
+
     from {
-        transform: translate(0px,0px);
+        transform:translate(0px,0px);
     }
+
     to {
-        transform: translate(60px,50px);
+        transform:translate(60px,50px);
     }
 }
 
 @keyframes float2 {
+
     from {
-        transform: translate(0px,0px);
+        transform:translate(0px,0px);
     }
+
     to {
-        transform: translate(-60px,-50px);
+        transform:translate(-60px,-50px);
     }
 }
 
 /* Header */
 .hero {
-    text-align: center;
-    margin-top: 30px;
+
+    text-align:center;
+
+    margin-top:30px;
+
+    animation:fadeIn 1.2s ease;
 }
 
+/* Multi Chemistry Icons */
 .dna {
-    font-size: 72px;
-    animation: floating 4s ease-in-out infinite;
+
+    font-size:58px;
+
+    margin-bottom:10px;
+
+    letter-spacing:10px;
+
+    animation:floating 4s ease-in-out infinite;
+
+    filter:drop-shadow(0 0 10px rgba(0,171,228,0.20));
 }
 
+/* Floating */
 @keyframes floating {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-    100% { transform: translateY(0px); }
+
+    0% {
+        transform:translateY(0px);
+    }
+
+    50% {
+        transform:translateY(-10px);
+    }
+
+    100% {
+        transform:translateY(0px);
+    }
+}
+
+/* Fade */
+@keyframes fadeIn {
+
+    from {
+        opacity:0;
+        transform:translateY(20px);
+    }
+
+    to {
+        opacity:1;
+        transform:translateY(0px);
+    }
 }
 
 /* Title */
 .title {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 68px;
-    font-weight: 800;
-    letter-spacing: -2px;
 
-    background: linear-gradient(
+    font-family:'Poppins', sans-serif;
+
+    font-size:56px;
+
+    font-weight:800;
+
+    line-height:1.05;
+
+    letter-spacing:-1px;
+
+    background:linear-gradient(
         90deg,
         #00ABE4,
         #4A90E2,
         #C5ADC5
     );
 
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
 
-    text-shadow: 0 0 10px rgba(0,171,228,0.18);
+    text-shadow:
+    0 0 8px rgba(0,171,228,0.18);
 }
 
 /* Tagline */
 .tagline {
-    margin-top: 10px;
-    font-size: 17px;
-    color: #5B6B82;
-    font-style: italic;
+
+    margin-top:12px;
+
+    font-size:17px;
+
+    color:#5B6B82;
+
+    font-style:italic;
+
+    font-weight:400;
 }
 
-/* Glass Card */
-.glass {
-    margin-top: 30px;
-    background: rgba(255,255,255,0.75);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.55);
-    border-radius: 26px;
-    padding: 30px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+/* Labels */
+label {
+
+    font-weight:600 !important;
+
+    color:#334155 !important;
 }
 
-/* Input */
+/* Input Box */
 input {
-    background: rgba(255,255,255,0.95) !important;
-    color: #111827 !important;
-    border-radius: 14px !important;
-    border: 1px solid rgba(0,171,228,0.18) !important;
-    font-family: monospace !important;
+
+    background:rgba(255,255,255,0.92)!important;
+
+    color:#111827!important;
+
+    border-radius:18px!important;
+
+    border:2px solid rgba(0,171,228,0.18)!important;
+
+    font-family:monospace!important;
+
+    padding:14px!important;
 }
 
 /* Button */
-.stButton>button {
-    width: 100%;
-    background: linear-gradient(
+.stButton > button {
+
+    width:100%;
+
+    background:linear-gradient(
         90deg,
         #00ABE4,
         #4A90E2,
         #B2B5E0
     );
 
-    border: none;
-    border-radius: 16px;
-    color: white;
-    font-size: 16px;
-    font-weight: 700;
-    padding: 14px;
+    border:none;
 
-    transition: 0.3s ease;
+    border-radius:18px;
 
-    box-shadow: 0 4px 15px rgba(0,171,228,0.22);
+    color:white;
+
+    font-size:17px;
+
+    font-weight:700;
+
+    padding:14px;
+
+    transition:0.3s ease;
+
+    box-shadow:
+    0 4px 15px rgba(0,171,228,0.22);
 }
 
-.stButton>button:hover {
-    transform: scale(1.02);
+.stButton > button:hover {
+
+    transform:scale(1.02);
+
+    box-shadow:
+    0 8px 25px rgba(0,171,228,0.30);
 }
 
-/* Result */
+/* Result Box */
 .result {
-    margin-top: 25px;
-    text-align: center;
-    font-size: 30px;
-    font-weight: 800;
-    padding: 18px;
-    border-radius: 18px;
+
+    margin-top:25px;
+
+    text-align:center;
+
+    font-size:28px;
+
+    font-weight:800;
+
+    padding:18px;
+
+    border-radius:20px;
+
+    animation:fadeIn 1s ease;
 }
 
-/* Good */
+/* Result Colors */
 .good {
-    background: rgba(0,171,228,0.10);
-    color: #0077B6;
-    border: 1px solid rgba(0,171,228,0.22);
+
+    background:rgba(0,171,228,0.10);
+
+    color:#0077B6;
+
+    border:1px solid rgba(0,171,228,0.22);
 }
 
-/* Moderate */
 .mid {
-    background: rgba(197,173,197,0.18);
-    color: #7C6280;
-    border: 1px solid rgba(197,173,197,0.28);
+
+    background:rgba(197,173,197,0.18);
+
+    color:#7C6280;
+
+    border:1px solid rgba(197,173,197,0.28);
 }
 
-/* Bad */
 .bad {
-    background: rgba(255,107,107,0.10);
-    color: #D62828;
-    border: 1px solid rgba(255,107,107,0.22);
+
+    background:rgba(255,107,107,0.10);
+
+    color:#D62828;
+
+    border:1px solid rgba(255,107,107,0.22);
+}
+
+/* Dataframe */
+[data-testid="stDataFrame"] {
+
+    border-radius:18px;
+
+    overflow:hidden;
+}
+
+/* Mobile Responsive */
+@media (max-width:768px){
+
+    .title{
+        font-size:42px;
+    }
+
+    .dna{
+        font-size:46px;
+        letter-spacing:6px;
+    }
+
+    .tagline{
+        font-size:15px;
+        padding:0 10px;
+    }
+
+    .stButton > button{
+        font-size:15px;
+        padding:12px;
+    }
 }
 
 </style>
 """, unsafe_allow_html=True)
 
-# =====================================================
+# =========================================================
 # HEADER
-# =====================================================
+# =========================================================
 st.markdown("""
 <div class="hero">
 
-<div class="dna">🧬</div>
+<div class="dna">
+⚗️ ⚛️ 🧬 🧫
+</div>
 
 <div class="title">
 BioBound
@@ -223,19 +368,17 @@ Where Molecular Intelligence Begins
 </div>
 """, unsafe_allow_html=True)
 
-# =====================================================
-# MAIN CARD
-# =====================================================
-st.markdown('<div class="glass">', unsafe_allow_html=True)
-
+# =========================================================
+# INPUT
+# =========================================================
 smiles = st.text_input(
     "Enter SMILES",
     placeholder="e.g. CC(=O)OC1=CC=CC=C1C(=O)O"
 )
 
-# =====================================================
+# =========================================================
 # PUBCHEM API
-# =====================================================
+# =========================================================
 def get_properties(smiles):
 
     try:
@@ -269,9 +412,9 @@ def get_properties(smiles):
     except:
         return None
 
-# =====================================================
+# =========================================================
 # ANALYSIS
-# =====================================================
+# =========================================================
 if st.button("Analyze Molecule"):
 
     if not smiles:
@@ -281,10 +424,10 @@ if st.button("Analyze Molecule"):
     props = get_properties(smiles)
 
     if props is None:
-        st.error("Invalid SMILES or API error")
+        st.error("Invalid SMILES or API Error")
         st.stop()
 
-    # Drug-likeness score
+    # Drug-Likeness Score
     score = 1.0
 
     score -= abs(props["Molecular Weight"] - 350) / 1000
@@ -335,10 +478,9 @@ if st.button("Analyze Molecule"):
             value=f"{score*100:.1f}%"
         )
 
+    # Properties Table
     st.subheader("Molecular Properties")
 
     df = pd.DataFrame([props])
 
     st.dataframe(df, use_container_width=True)
-
-st.markdown("</div>", unsafe_allow_html=True)
