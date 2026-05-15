@@ -1,1 +1,1 @@
-# drug-ai-project
+# BioBound Project
