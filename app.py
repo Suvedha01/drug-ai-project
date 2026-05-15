@@ -173,28 +173,6 @@ st.markdown("""
     }
 }
 
-/* ---------------- GLASS CARD ---------------- */
-
-.glass{
-    margin-top:30px;
-
-    background:rgba(255,255,255,0.06);
-
-    backdrop-filter:blur(20px);
-
-    border:1px solid rgba(255,255,255,0.10);
-
-    border-radius:24px;
-
-    padding:30px;
-
-    box-shadow:
-    0 8px 32px rgba(0,0,0,0.35),
-    inset 0 1px 1px rgba(255,255,255,0.08);
-
-    animation:fadeIn 1.2s ease;
-}
-
 /* ---------------- INPUT ---------------- */
 
 input{
