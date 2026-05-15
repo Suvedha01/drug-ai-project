@@ -175,7 +175,7 @@ input{
 # HEADER
 # =========================================
 st.markdown(
-    '<div class="title">🧬 LigandLogic</div>',
+    '<div class="title">🧬BIOBOUND</div>',
     unsafe_allow_html=True
 )
 
