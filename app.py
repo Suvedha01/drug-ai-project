@@ -2,18 +2,15 @@ import streamlit as st
 import requests
 import pandas as pd
 
-# =========================================================
 # PAGE CONFIG
-# =========================================================
 st.set_page_config(
     page_title="BioBound",
     page_icon="⚗️",
     layout="centered"
 )
 
-# =========================================================
 # PREMIUM BIOTECH UI
-# =========================================================
+
 st.markdown("""
 <style>
 
@@ -343,7 +340,23 @@ input {
         padding:12px;
     }
 }
+/* Metric Numbers */
+[data-testid="stMetricValue"] {
 
+    color:#111827 !important;
+
+    font-weight:700 !important;
+
+    font-size:34px !important;
+}
+
+/* Metric Labels */
+[data-testid="stMetricLabel"] {
+
+    color:#334155 !important;
+
+    font-weight:600 !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
