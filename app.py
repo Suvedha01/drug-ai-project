@@ -94,22 +94,47 @@ st.markdown("""
 }
 
 /* Title */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800&display=swap');
+
 .title{
-    font-size:64px;
+
+    font-family:'Orbitron', sans-serif;
+
+    font-size:68px;
+
     font-weight:800;
-    letter-spacing:-2px;
+
+    letter-spacing:-1px;
+
+    margin-top:-5px;
 
     background:linear-gradient(
     90deg,
-    #ffffff,
-    #7DF9FF,
-    #D946EF
+    #ffffff 0%,
+    #7DF9FF 35%,
+    #C084FC 70%,
+    #ffffff 100%
     );
 
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
 
-    text-shadow:0 0 25px rgba(0,212,255,0.25);
+    text-shadow:
+    0 0 12px rgba(125,249,255,0.35),
+    0 0 28px rgba(192,132,252,0.25);
+
+    animation:titleGlow 4s ease-in-out infinite alternate;
+}
+
+@keyframes titleGlow{
+
+    from{
+        filter:drop-shadow(0 0 8px rgba(125,249,255,0.25));
+    }
+
+    to{
+        filter:drop-shadow(0 0 18px rgba(192,132,252,0.45));
+    }
 }
 
 /* Tagline */
