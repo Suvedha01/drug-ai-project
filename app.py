@@ -7,115 +7,184 @@ import pandas as pd
 # =========================================
 st.set_page_config(
     page_title="LigandLogic",
+    page_icon="🧬",
     layout="centered"
 )
 
 # =========================================
-# PREMIUM UI
+# PREMIUM TECH-BIO UI
 # =========================================
 st.markdown("""
 <style>
 
-/* Background */
+/* Main Background */
 .stApp{
-    background: linear-gradient(135deg,#f8fbff,#eef4ff);
-    color:#111827;
+    background:
+    radial-gradient(circle at top left, rgba(0,255,255,0.10), transparent 30%),
+    radial-gradient(circle at bottom right, rgba(123,97,255,0.15), transparent 30%),
+    linear-gradient(135deg,#06121f,#0b1f33,#071522);
+    color:#EAF2FF;
+}
+
+/* Remove Streamlit default padding */
+.block-container{
+    padding-top:2rem;
 }
 
 /* Title */
 .title{
     text-align:center;
-    font-size:54px;
+    font-size:58px;
     font-weight:800;
-    margin-top:10px;
-    background: linear-gradient(90deg,#ff512f,#dd2476,#7b61ff);
+    letter-spacing:-1px;
+    margin-bottom:5px;
+
+    background: linear-gradient(90deg,#7DF9FF,#7B61FF,#00D4FF);
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
+
+    text-shadow:0 0 25px rgba(0,212,255,0.25);
 }
 
 /* Tagline */
 .tagline{
     text-align:center;
-    font-size:16px;
-    color:#6b7280;
+    font-size:17px;
+    color:#A8C1E8;
     font-style:italic;
-    margin-bottom:20px;
+    margin-bottom:28px;
+    letter-spacing:0.5px;
 }
 
-/* Card */
+/* Glass Card */
 .card{
-    background:white;
-    padding:25px;
-    border-radius:18px;
-    box-shadow:0 8px 30px rgba(0,0,0,0.08);
-    margin-top:10px;
+    background:rgba(255,255,255,0.06);
+    backdrop-filter:blur(18px);
+
+    border:1px solid rgba(255,255,255,0.10);
+
+    padding:28px;
+    border-radius:22px;
+
+    box-shadow:
+    0 8px 32px rgba(0,0,0,0.35),
+    inset 0 1px 1px rgba(255,255,255,0.08);
 }
 
 /* Input */
 input{
-    border-radius:12px !important;
+    background:rgba(255,255,255,0.06)!important;
+    color:white!important;
+
+    border-radius:14px!important;
+    border:1px solid rgba(125,249,255,0.20)!important;
+
+    font-family:monospace!important;
 }
 
 /* Button */
 .stButton>button{
     width:100%;
+
+    background:linear-gradient(90deg,#00D4FF,#7B61FF);
+
+    color:white;
     border:none;
-    border-radius:12px;
-    padding:12px;
+
+    border-radius:14px;
+
+    padding:14px;
+
     font-size:16px;
     font-weight:700;
-    color:white;
-    background:linear-gradient(90deg,#ff512f,#f9d423);
-    transition:0.3s;
+
+    transition:0.3s ease;
+
+    box-shadow:0 0 18px rgba(0,212,255,0.35);
 }
 
 .stButton>button:hover{
-    transform:scale(1.02);
+    transform:translateY(-2px);
+    box-shadow:0 0 28px rgba(0,212,255,0.55);
 }
 
-/* Result */
+/* Result Box */
 .result{
     text-align:center;
-    font-size:28px;
+
+    font-size:30px;
     font-weight:800;
-    padding:16px;
-    border-radius:14px;
-    margin-top:20px;
+
+    padding:18px;
+    margin-top:25px;
+
+    border-radius:18px;
 }
 
 .good{
-    background:#dcfce7;
-    color:#166534;
+    background:rgba(0,255,163,0.12);
+    color:#00FFA3;
+    border:1px solid rgba(0,255,163,0.25);
 }
 
 .mid{
-    background:#fef3c7;
-    color:#92400e;
+    background:rgba(255,209,102,0.12);
+    color:#FFD166;
+    border:1px solid rgba(255,209,102,0.25);
 }
 
 .bad{
-    background:#fee2e2;
-    color:#991b1b;
+    background:rgba(255,107,107,0.12);
+    color:#FF6B6B;
+    border:1px solid rgba(255,107,107,0.25);
 }
 
-/* Metric cards */
+/* Metric Cards */
 .metric-card{
-    background:white;
-    padding:16px;
-    border-radius:14px;
+    background:rgba(255,255,255,0.05);
+
+    border:1px solid rgba(255,255,255,0.08);
+
+    padding:18px;
+    border-radius:18px;
+
     text-align:center;
-    box-shadow:0 4px 15px rgba(0,0,0,0.06);
+
+    margin-top:12px;
 }
 
 .metric-title{
     font-size:14px;
-    color:#6b7280;
+    color:#9BB4D3;
 }
 
 .metric-value{
-    font-size:24px;
+    font-size:28px;
     font-weight:700;
-    margin-top:5px;
+    margin-top:6px;
+
+    background:linear-gradient(90deg,#7DF9FF,#7B61FF);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+/* Table */
+[data-testid="stDataFrame"]{
+    border-radius:16px;
+    overflow:hidden;
+}
+
+/* Divider */
+.divider{
+    height:1px;
+    margin:25px 0;
+
+    background:linear-gradient(
+    90deg,
+    transparent,
+    rgba(125,249,255,0.45),
+    transparent
+    );
 }
 
 </style>
@@ -124,7 +193,10 @@ input{
 # =========================================
 # HEADER
 # =========================================
-st.markdown('<div class="title">🧬 LigandLogic</div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="title">🧬 LigandLogic</div>',
+    unsafe_allow_html=True
+)
 
 st.markdown(
     '<div class="tagline">where machine learning meets molecular intelligence</div>',
@@ -132,7 +204,7 @@ st.markdown(
 )
 
 # =========================================
-# INPUT CARD
+# MAIN CARD
 # =========================================
 st.markdown('<div class="card">', unsafe_allow_html=True)
 
@@ -142,7 +214,7 @@ smiles = st.text_input(
 )
 
 # =========================================
-# PUBCHEM API
+# PUBCHEM FUNCTION
 # =========================================
 def get_properties(smiles):
 
@@ -186,7 +258,6 @@ if st.button("Analyze Molecule"):
     # =========================================
     score = 1.0
 
-    # Smooth penalty system
     score -= abs(props["Molecular Weight"] - 350) / 1000
     score -= abs(props["LogP"] - 2.5) / 10
     score -= abs(props["TPSA"] - 75) / 300
@@ -197,17 +268,16 @@ if st.button("Analyze Molecule"):
     if props["H Acceptors"] > 12:
         score -= 0.1
 
-    # Clamp score
     score = max(0.0, min(score, 1.0))
 
     # =========================================
-    # DECISION
+    # THRESHOLDS
     # =========================================
-    if score >= 0.7:
+    if score >= 0.60:
         decision = "DRUG-LIKE"
         cls = "good"
 
-    elif score >= 0.4:
+    elif score >= 0.35:
         decision = "MODERATE"
         cls = "mid"
 
@@ -216,7 +286,7 @@ if st.button("Analyze Molecule"):
         cls = "bad"
 
     # =========================================
-    # RESULT DISPLAY
+    # RESULT
     # =========================================
     st.markdown(
         f'<div class="result {cls}">{decision}</div>',
@@ -252,7 +322,9 @@ if st.button("Analyze Molecule"):
             unsafe_allow_html=True
         )
 
-    st.markdown("### Molecular Properties")
+    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
+
+    st.subheader("Molecular Properties")
 
     df = pd.DataFrame([props])
 
