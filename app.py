@@ -2,18 +2,14 @@ import streamlit as st
 import requests
 import pandas as pd
 
-# =========================================
 # PAGE CONFIG
-# =========================================
 st.set_page_config(
     page_title="BioBound",
     page_icon="🧬",
     layout="centered"
 )
 
-# =========================================
-# PREMIUM TECH-BIO UI
-# =========================================
+# TECH-BIO UI
 st.markdown("""
 <style>
 
@@ -54,21 +50,6 @@ st.markdown("""
     font-style:italic;
     margin-bottom:28px;
     letter-spacing:0.5px;
-}
-
-/* Glass Card */
-.card{
-    background:rgba(255,255,255,0.06);
-    backdrop-filter:blur(18px);
-
-    border:1px solid rgba(255,255,255,0.10);
-
-    padding:28px;
-    border-radius:22px;
-
-    box-shadow:
-    0 8px 32px rgba(0,0,0,0.35),
-    inset 0 1px 1px rgba(255,255,255,0.08);
 }
 
 /* Input */
