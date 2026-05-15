@@ -2,40 +2,110 @@ import streamlit as st
 import requests
 import pandas as pd
 
+# =========================================
 # PAGE CONFIG
+# =========================================
 st.set_page_config(
     page_title="BioBound",
     page_icon="🧬",
     layout="centered"
 )
 
-# TECH-BIO UI
+# =========================================
+# FUTURISTIC TECH-BIO UI
+# =========================================
 st.markdown("""
 <style>
 
-/* Main Background */
+/* ---------------- BACKGROUND ---------------- */
+
 .stApp{
     background:
-    radial-gradient(circle at top left, rgba(0,255,255,0.10), transparent 30%),
-    radial-gradient(circle at bottom right, rgba(123,97,255,0.15), transparent 30%),
-    linear-gradient(135deg,#06121f,#0b1f33,#071522);
+    radial-gradient(circle at top left, rgba(0,255,255,0.12), transparent 25%),
+    radial-gradient(circle at bottom right, rgba(255,0,128,0.10), transparent 25%),
+    linear-gradient(135deg,#050816,#091120,#050816);
+
     color:#EAF2FF;
+    overflow:hidden;
 }
 
-/* Remove Streamlit default padding */
-.block-container{
-    padding-top:2rem;
+/* Floating animated glow */
+.stApp::before{
+    content:'';
+    position:fixed;
+    width:500px;
+    height:500px;
+    background:rgba(0,212,255,0.10);
+    border-radius:50%;
+    filter:blur(120px);
+    top:-100px;
+    left:-100px;
+    animation:floatGlow 10s ease-in-out infinite alternate;
+    z-index:-1;
+}
+
+.stApp::after{
+    content:'';
+    position:fixed;
+    width:450px;
+    height:450px;
+    background:rgba(183,0,255,0.12);
+    border-radius:50%;
+    filter:blur(120px);
+    bottom:-100px;
+    right:-100px;
+    animation:floatGlow2 12s ease-in-out infinite alternate;
+    z-index:-1;
+}
+
+/* Glow animations */
+@keyframes floatGlow{
+    from{
+        transform:translateY(0px) translateX(0px);
+    }
+    to{
+        transform:translateY(60px) translateX(40px);
+    }
+}
+
+@keyframes floatGlow2{
+    from{
+        transform:translateY(0px) translateX(0px);
+    }
+    to{
+        transform:translateY(-60px) translateX(-40px);
+    }
+}
+
+/* ---------------- HEADER ---------------- */
+
+.hero{
+    text-align:center;
+    margin-top:30px;
+    animation:fadeIn 1.5s ease;
+}
+
+/* Floating DNA */
+.dna{
+    font-size:70px;
+    margin-bottom:10px;
+    animation:floating 4s ease-in-out infinite;
+    filter:drop-shadow(0 0 18px rgba(0,212,255,0.5));
 }
 
 /* Title */
 .title{
-    text-align:center;
-    font-size:58px;
+    font-size:64px;
     font-weight:800;
-    letter-spacing:-1px;
-    margin-bottom:5px;
+    letter-spacing:-2px;
 
-    background: linear-gradient(90deg,#7DF9FF,#7B61FF,#00D4FF);
+    background:linear-gradient(
+    90deg,
+    #ffffff,
+    #7DF9FF,
+    #D946EF
+    );
+
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
 
@@ -44,62 +114,132 @@ st.markdown("""
 
 /* Tagline */
 .tagline{
-    text-align:center;
-    font-size:17px;
-    color:#A8C1E8;
+    margin-top:10px;
+
+    font-size:18px;
     font-style:italic;
-    margin-bottom:28px;
+
+    color:#B8C7E0;
     letter-spacing:0.5px;
 }
 
-/* Input */
-input{
-    background:rgba(255,255,255,0.06)!important;
-    color:white!important;
-
-    border-radius:14px!important;
-    border:1px solid rgba(125,249,255,0.20)!important;
-
-    font-family:monospace!important;
+/* Floating */
+@keyframes floating{
+    0%{
+        transform:translateY(0px);
+    }
+    50%{
+        transform:translateY(-10px);
+    }
+    100%{
+        transform:translateY(0px);
+    }
 }
 
-/* Button */
+/* Fade in */
+@keyframes fadeIn{
+    from{
+        opacity:0;
+        transform:translateY(20px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0px);
+    }
+}
+
+/* ---------------- GLASS CARD ---------------- */
+
+.glass{
+    margin-top:30px;
+
+    background:rgba(255,255,255,0.06);
+
+    backdrop-filter:blur(20px);
+
+    border:1px solid rgba(255,255,255,0.10);
+
+    border-radius:24px;
+
+    padding:30px;
+
+    box-shadow:
+    0 8px 32px rgba(0,0,0,0.35),
+    inset 0 1px 1px rgba(255,255,255,0.08);
+
+    animation:fadeIn 1.2s ease;
+}
+
+/* ---------------- INPUT ---------------- */
+
+input{
+    background:rgba(255,255,255,0.05)!important;
+
+    color:white!important;
+
+    border-radius:16px!important;
+
+    border:1px solid rgba(125,249,255,0.25)!important;
+
+    font-family:monospace!important;
+
+    padding:12px!important;
+}
+
+/* ---------------- BUTTON ---------------- */
+
 .stButton>button{
+
     width:100%;
 
-    background:linear-gradient(90deg,#00D4FF,#7B61FF);
+    background:linear-gradient(
+    90deg,
+    #00D4FF,
+    #7B61FF,
+    #D946EF
+    );
 
-    color:white;
     border:none;
 
-    border-radius:14px;
-
-    padding:14px;
+    color:white;
 
     font-size:16px;
     font-weight:700;
 
+    border-radius:16px;
+
+    padding:14px;
+
     transition:0.3s ease;
 
-    box-shadow:0 0 18px rgba(0,212,255,0.35);
+    box-shadow:0 0 20px rgba(0,212,255,0.35);
 }
 
+/* Hover effect */
 .stButton>button:hover{
-    transform:translateY(-2px);
-    box-shadow:0 0 28px rgba(0,212,255,0.55);
+    transform:scale(1.03);
+
+    box-shadow:
+    0 0 30px rgba(0,212,255,0.55),
+    0 0 50px rgba(217,70,239,0.35);
 }
 
-/* Result Box */
+/* ---------------- RESULT ---------------- */
+
 .result{
+
+    margin-top:25px;
+
     text-align:center;
 
     font-size:30px;
     font-weight:800;
 
     padding:18px;
-    margin-top:25px;
 
     border-radius:18px;
+
+    animation:fadeIn 1s ease;
 }
 
 .good{
@@ -120,50 +260,64 @@ input{
     border:1px solid rgba(255,107,107,0.25);
 }
 
-/* Metric Cards */
+/* ---------------- METRIC CARDS ---------------- */
+
 .metric-card{
+
     background:rgba(255,255,255,0.05);
 
     border:1px solid rgba(255,255,255,0.08);
 
-    padding:18px;
-    border-radius:18px;
+    border-radius:20px;
+
+    padding:20px;
 
     text-align:center;
 
-    margin-top:12px;
+    margin-top:14px;
+
+    transition:0.3s ease;
+}
+
+.metric-card:hover{
+    transform:translateY(-4px) scale(1.02);
+
+    border:1px solid rgba(125,249,255,0.25);
+
+    box-shadow:0 0 20px rgba(0,212,255,0.15);
 }
 
 .metric-title{
+    color:#B8C7E0;
     font-size:14px;
-    color:#9BB4D3;
 }
 
 .metric-value{
-    font-size:28px;
+    font-size:30px;
     font-weight:700;
+
     margin-top:6px;
 
-    background:linear-gradient(90deg,#7DF9FF,#7B61FF);
+    background:linear-gradient(
+    90deg,
+    #7DF9FF,
+    #D946EF
+    );
+
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
 }
 
-/* Table */
-[data-testid="stDataFrame"]{
-    border-radius:16px;
-    overflow:hidden;
-}
-
 /* Divider */
 .divider{
+    margin:28px 0;
+
     height:1px;
-    margin:25px 0;
 
     background:linear-gradient(
     90deg,
     transparent,
-    rgba(125,249,255,0.45),
+    rgba(125,249,255,0.35),
     transparent
     );
 }
@@ -174,20 +328,26 @@ input{
 # =========================================
 # HEADER
 # =========================================
-st.markdown(
-    '<div class="title">🧬BioBound</div>',
-    unsafe_allow_html=True
-)
+st.markdown("""
+<div class="hero">
 
-st.markdown(
-    '<div class="tagline">Where Molecular Intelligence Begins</div>',
-    unsafe_allow_html=True
-)
+<div class="dna">🧬</div>
+
+<div class="title">
+BioBound
+</div>
+
+<div class="tagline">
+Where Molecular Intelligence Begins
+</div>
+
+</div>
+""", unsafe_allow_html=True)
 
 # =========================================
 # MAIN CARD
 # =========================================
-st.markdown('<div class="card">', unsafe_allow_html=True)
+st.markdown('<div class="glass">', unsafe_allow_html=True)
 
 smiles = st.text_input(
     "Enter SMILES",
@@ -195,11 +355,12 @@ smiles = st.text_input(
 )
 
 # =========================================
-# PUBCHEM FUNCTION
+# PUBCHEM API
 # =========================================
 def get_properties(smiles):
 
     try:
+
         url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/{smiles}/property/MolecularWeight,XLogP,HBondDonorCount,HBondAcceptorCount,TPSA/JSON"
 
         response = requests.get(url, timeout=10)
@@ -231,11 +392,11 @@ if st.button("Analyze Molecule"):
     props = get_properties(smiles)
 
     if props is None:
-        st.error("Invalid SMILES or PubChem API error")
+        st.error("Invalid SMILES or API Error")
         st.stop()
 
     # =========================================
-    # QED-INSPIRED CONTINUOUS SCORING
+    # QED-LIKE SCORING
     # =========================================
     score = 1.0
 
@@ -252,7 +413,7 @@ if st.button("Analyze Molecule"):
     score = max(0.0, min(score, 1.0))
 
     # =========================================
-    # THRESHOLDS
+    # CLASSIFICATION
     # =========================================
     if score >= 0.60:
         decision = "DRUG-LIKE"
@@ -282,28 +443,43 @@ if st.button("Analyze Molecule"):
     col1, col2 = st.columns(2)
 
     with col1:
+
         st.markdown(
             f"""
             <div class="metric-card">
-                <div class="metric-title">Drug-Likeness Score</div>
-                <div class="metric-value">{score:.2f}</div>
+                <div class="metric-title">
+                Drug-Likeness Score
+                </div>
+
+                <div class="metric-value">
+                {score:.2f}
+                </div>
             </div>
             """,
             unsafe_allow_html=True
         )
 
     with col2:
+
         st.markdown(
             f"""
             <div class="metric-card">
-                <div class="metric-title">Confidence</div>
-                <div class="metric-value">{score*100:.1f}%</div>
+                <div class="metric-title">
+                Confidence
+                </div>
+
+                <div class="metric-value">
+                {score*100:.1f}%
+                </div>
             </div>
             """,
             unsafe_allow_html=True
         )
 
-    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="divider"></div>',
+        unsafe_allow_html=True
+    )
 
     st.subheader("Molecular Properties")
 
