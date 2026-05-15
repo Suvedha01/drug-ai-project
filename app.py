@@ -180,7 +180,7 @@ st.markdown(
 )
 
 st.markdown(
-    '<div class="tagline">where machine learning meets molecular intelligence</div>',
+    '<div class="tagline">Where Molecular Intelligence Begins</div>',
     unsafe_allow_html=True
 )
 
