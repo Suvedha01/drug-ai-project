@@ -6,7 +6,7 @@ import pandas as pd
 # PAGE CONFIG
 # =========================================
 st.set_page_config(
-    page_title="LigandLogic",
+    page_title="BioBound",
     page_icon="🧬",
     layout="centered"
 )
