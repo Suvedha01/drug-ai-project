@@ -175,7 +175,7 @@ input{
 # HEADER
 # =========================================
 st.markdown(
-    '<div class="title">🧬BIOBOUND</div>',
+    '<div class="title">🧬BioBound</div>',
     unsafe_allow_html=True
 )
 
